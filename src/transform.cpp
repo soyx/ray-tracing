@@ -45,22 +45,25 @@ inline Point3f Transform::operator()(const Point3f &p) const
     else
         return Point3f(xx / ww, yy / ww, zz / ww);
 }
-
 inline Vector3f Transform::operator()(const Vector3f &v) const
 {
     return Vector3f(mat.m[0][0] * v.x + mat.m[0][1] * v.y + mat.m[0][2] * v.z,
                     mat.m[1][0] * v.x + mat.m[1][1] * v.y + mat.m[1][2] * v.z,
                     mat.m[2][0] * v.x + mat.m[2][1] * v.y + mat.m[3][2] * v.z);
 }
-
 inline Normal3f Transform::operator()(const Normal3f &n) const
 {
     return Normal3f(inv.m[0][0] * n.x + inv.m[1][0] * n.y + inv.m[2][0] * n.z,
                     inv.m[0][1] * n.x + inv.m[1][1] * n.y + inv.m[2][1] * n.z,
                     inv.m[0][2] * n.x + inv.m[1][2] * n.y + inv.m[2][2] * n.z);
 }
-inline Ray Transform::operator()(const Ray &r)const{
+inline Ray Transform::operator()(const Ray &r) const
+{
+}
 
+Transform Transform::operator*(const Transform &t2) const
+{
+    return Transform(mat * t2.mat, t2.inv * inv);
 }
 
 Transform translate(const Vector3f &delta)
