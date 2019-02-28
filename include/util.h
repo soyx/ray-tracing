@@ -1,8 +1,6 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include <iostream>
-#include <string>
 #include <limits>
 
 #define INF std::numeric_limits<float>::infinity()
@@ -16,9 +14,17 @@ class Vector2
 
     Vector2() { x = y = 0; }
     Vector2(T x, T y) : x(x), y(y) {}
-    Vector2(const Vector2<T> &v){
+    Vector2(const Vector2<T> &v)
+    {
         x = v.x;
         y = v.y;
+    }
+
+    Vector2<T> &operator=(const Vector2<T> &v2)
+    {
+        this->x = v2.x;
+        this->y = v2.y;
+        return *this;
     }
 
     // vec2 + vec2
@@ -81,6 +87,11 @@ class Vector2
     {
         return x * x + y * y;
     }
+
+    Vector2<T> normalize() const
+    {
+        return (*this) / std::sqrtf(getMagnitudeSquare());
+    }
 };
 
 template <typename T>
@@ -91,10 +102,19 @@ class Vector3
 
     Vector3() { x = y = z = 0; }
     Vector3(T x, T y, T z) : x(x), y(y), z(z) {}
-    Vector3(const Vector3<T>& v){
+    Vector3(const Vector3<T> &v)
+    {
         x = v.x;
         y = v.y;
         z = v.z;
+    }
+
+    Vector3<T> &operator=(const Vector3<T> &v3)
+    {
+        this->x = v3.x;
+        this->y = v3.y;
+        this->z = v3.z;
+        return *this;
     }
 
     // vec3 + vec3
@@ -161,6 +181,11 @@ class Vector3
     {
         return x * x + y * y + z * z;
     }
+
+    Vector3<T> normalize() const
+    {
+        return (*this) / std::sqrtf(getMagnitudeSquare());
+    }
 };
 
 template <typename T>
@@ -203,7 +228,9 @@ class Point2
 
     Point2<T> &operator=(const Point2<T> &p) const
     {
-        return Point2(p.x, p.y);
+        this->x = p.x;
+        this->y = p.y;
+        return *this;
     }
 
     Point2<T> operator+(const Vector2<T> &v) const
@@ -251,7 +278,10 @@ class Point3
 
     Point3<T> &operator=(const Point3<T> &p) const
     {
-        return Point3(p.x, p.y, p.z);
+        this->x = p.x;
+        this->y = p.y;
+        this->z = p.z;
+        return *this;
     }
     Point3<T> operator+(const Vector3<T> &v) const
     {
@@ -304,10 +334,13 @@ class Normal3
 
     Normal3<T> &operator=(const Normal3<T> n3) const
     {
-        return Normal3(n3.x, n3, y, n3.z);
+        this->x = n3.x;
+        this->y = n3.y;
+        this->z = n3.z;
+        return *this;
     }
 
-    void normalization()
+    void normalize()
     {
         float m = std::sqrt(getMagnitudeSquare());
         if (m > 0)
@@ -349,7 +382,8 @@ class Ray
         float tMax = INF, float time = 0.f)
         : o(o), d(d), tMax(tMax), time(time) {}
 
-    Point3f operator()(float t)const {
+    Point3f operator()(float t) const
+    {
         return o + d * t;
     }
 };
