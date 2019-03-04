@@ -2,6 +2,7 @@
 #define UTIL_H
 
 #include <limits>
+#include <cmath>
 
 #define INF std::numeric_limits<float>::infinity()
 
@@ -226,7 +227,7 @@ class Point2
         y = p.y;
     }
 
-    Point2<T> &operator=(const Point2<T> &p) const
+    Point2<T> &operator=(const Point2<T> &p)
     {
         this->x = p.x;
         this->y = p.y;
@@ -235,7 +236,7 @@ class Point2
 
     Point2<T> operator+(const Vector2<T> &v) const
     {
-        return Point2(x + v.x, y + v.y);
+        return Point2<T>(x + v.x, y + v.y);
     }
 
     Point2<T> &operator+=(const Vector2<T> &v)
@@ -247,13 +248,13 @@ class Point2
 
     Point2<T> operator-(const Vector2<T> &v) const
     {
-        return Point2(x - v.x, y - v.y);
+        return Point2<T>(x - v.x, y - v.y);
     }
     Vector2<T> operator-(const Point2<T> &p) const
     {
-        return Vector2(x - p.x, y - p.y);
+        return Vector2<T>(x - p.x, y - p.y);
     }
-    Point2<T> &operator-(const Vector2<T> &v) const
+    Point2<T> &operator-=(const Vector2<T> &v) const
     {
         x -= v.x;
         y -= v.y;
@@ -285,7 +286,7 @@ class Point3
     }
     Point3<T> operator+(const Vector3<T> &v) const
     {
-        return Point3(x + v.x, y + v.y, z + v.z);
+        return Point3<T>(x + v.x, y + v.y, z + v.z);
     }
 
     Point3<T> &operator+=(const Vector3<T> &v)
@@ -298,11 +299,11 @@ class Point3
 
     Point3<T> operator-(const Vector3<T> &v) const
     {
-        return Point3(x - v.x, y - v.y, z - v.z);
+        return Point3<T>(x - v.x, y - v.y, z - v.z);
     }
     Vector3<T> operator-(const Point3<T> &p) const
     {
-        return Vector3(x - p.x, y - p.y, z - p.z);
+        return Vector3<T>(x - p.x, y - p.y, z - p.z);
     }
     Point3<T> &operator-=(const Vector3<T> &v) const
     {
@@ -360,7 +361,7 @@ class Normal3
 template <typename T>
 T dot(Vector3<T> v, Normal3<T> n)
 {
-    return v.x * n.x + v.y * n = y + v.z * n.z;
+    return v.x * n.x + v.y * n.y + v.z * n.z;
 }
 
 using Normal3f = Normal3<float>;

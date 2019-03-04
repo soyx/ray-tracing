@@ -59,6 +59,8 @@ inline Normal3f Transform::operator()(const Normal3f &n) const
 }
 inline Ray Transform::operator()(const Ray &r) const
 {
+    // todo
+    return Ray();
 }
 
 Transform Transform::operator*(const Transform &t2) const
@@ -139,6 +141,7 @@ Transform rotateZ(float theta)
              -sinTheta, cosTheta, 0, 0,
              0, 0, 1, 0,
              0, 0, 0, 1);
+    return Transform(mat, inv);
 }
 
 Transform rotate(float theta, const Vector3f &axis)
