@@ -17,6 +17,10 @@ struct Face{
     int mNormalsIndices[3] = {-1, -1, -1};
     int mTextureCoordsIndices[3] = {-1, -1, -1};
 
+    // {xMax, yMax, zMax}
+    int maxVecticesIndices[3] = {-1, -1, -1};
+    int minVecticesIndices[3] = {-1, -1, -1};
+
     std::string  materialName;
 };
 
@@ -29,9 +33,9 @@ struct Mesh
     int mNumTextureCoords;
     int numFaces;
 
-    std::vector<Vector3f> mVertices;
+    std::vector<Point3f> mVertices;
     std::vector<Vector3f> mNormals;
-    std::vector<Vector2f> mTextureCoords;
+    std::vector<Point2f> mTextureCoords;
 
     std::vector<Face> faces;
 
@@ -80,6 +84,9 @@ class Model
     bool loadObj(std::string objPath);
 
     bool loadMtl(std::string mtlPath);
+
+    void getMaxIndices(Face &face, const Mesh &mesh);
+    void getMinIndices(Face &face, const Mesh &mesh);
 };
 
 #endif // MODEL_H

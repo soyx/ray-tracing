@@ -162,11 +162,22 @@ class Vector3
         return *this;
     }
 
+    // vec3 / vec3
+    template <typename U>
+    const Vector3<T> operator/(Vector3<U> v) const
+    {
+        if (v.x == 0 || v.y == 0 || v.z == 0)
+            return Vector3<T>(0, 0, 0);
+        return Vector3<T>(x / v.x, y / y.y, z / v.z);
+    }
+
     // vec3 / scalar
     template <typename U>
     Vector3<T> operator/(U s) const
     {
-        return Vector3<T>(s / x, s / y, s / z);
+        if (s == 0)
+            return Vector3<T>(0, 0, 0);
+        return Vector3<T>(x / s, y / s, z / s);
     }
     // vec3 /= scalar
     template <typename U>
@@ -389,4 +400,28 @@ class Ray
     }
 };
 
+// bounding box
+template <typename T>
+class Bounds2
+{
+  public:
+    Bounds2()
+    {
+        T minNum = std::numeric_limits<T>::lowest();
+        T maxNum = std::numeric_limits<T>::max();
+
+        pMin = Point2<T>(maxNum, maxNum);
+        pMin = Point2<T>(minNum, minNum);
+    }
+
+    Bounds2(const Point2<T> &p1, const Point2<T> &p2)
+    {
+        pMin = Point2<T>(std::min(p1.x, p2.x), std::min(p1.y, p2.y));
+        pMax = Point2<T>(std::max(p1.x, p2.x), std::max(p1.y, p2.y));
+    }
+
+    Point2<T> pMin, pMax;
+};
+
+using Bounds2f = Bounds2<float>;
 #endif // UTIL_H

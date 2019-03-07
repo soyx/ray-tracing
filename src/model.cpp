@@ -130,7 +130,7 @@ bool Model::loadObj(std::string objPath)
             std::stringstream ss(data);
             float vx, vy, vz;
             ss >> vx >> vy >> vz;
-            mesh.mVertices.push_back(Vector3f(vx, vy, vz));
+            mesh.mVertices.push_back(Point3f(vx, vy, vz));
         }
 
         // normal
@@ -150,7 +150,7 @@ bool Model::loadObj(std::string objPath)
             std::stringstream ss(data);
             float vtx, vty;
             ss >> vtx >> vty;
-            mesh.mTextureCoords.push_back(Vector2f(vtx, vty));
+            mesh.mTextureCoords.push_back(Point2f(vtx, vty));
         }
 
         // update mtl of face
@@ -206,7 +206,8 @@ bool Model::loadObj(std::string objPath)
             }
 
             face.materialName = mtlName;
-
+            getMaxIndices(face);
+            getMinIndices(face);
             mesh.faces.push_back(face);
 
             // convert origin faces to trigle faces
@@ -233,6 +234,8 @@ bool Model::loadObj(std::string objPath)
                 }
 
                 face.materialName = mtlName;
+                getMaxIndices(face);
+                getMinIndices(face);
                 mesh.faces.push_back(face);
             }
         }
@@ -351,4 +354,86 @@ bool Model::loadMtl(std::string mtlPath)
         
     }
     return true;
+}
+
+void getMaxIndices(Face &face, const Mesh &mesh){
+    // xMax
+    int xMaxIndices = -1;
+    int xMax = std::numeric_limits<int>::min();
+    for(int i = 0; i < 3; i++){
+        if(mesh.mVertices[face.mVerticesIndices[i]].x > xMax)
+        {
+            xMax = mesh.mVertices[face.mVerticesIndices[i]].x;
+            xMaxIndices = face.maxVecticesIndices[i];
+        }
+    }
+    face.maxVecticesIndices[0] = xMaxIndices;
+
+    // yMax
+    int yMaxIndices = -1;
+    int yMax = std::numeric_limits<int>::min();
+    for (int i = 0; i < 3; i++)
+    {
+        if (mesh.mVertices[face.mVerticesIndices[i]].y > yMax)
+        {
+            yMax = mesh.mVertices[face.mVerticesIndices[i]].y;
+            yMaxIndices = face.maxVecticesIndices[i];
+        }
+    }
+    face.maxVecticesIndices[1] = yMaxIndices;
+
+    // zMax
+    int zMaxIndices = -1;
+    int zMax = std::numeric_limits<int>::min();
+    for (int i = 0; i < 3; i++)
+    {
+        if (mesh.mVertices[face.mVerticesIndices[i]].z > zMax)
+        {
+            zMax = mesh.mVertices[face.mVerticesIndices[i]].z;
+            zMaxIndices = face.maxVecticesIndices[i];
+        }
+    }
+    face.maxVecticesIndices[2] = zMaxIndices;
+}
+
+void getMinIndices(Face &face, const Mesh &mesh)
+{
+    // xMin
+    int xMinIndices = -1;
+    int xMin = std::numeric_limits<int>::max();
+    for (int i = 0; i < 3; i++)
+    {
+        if (mesh.mVertices[face.mVerticesIndices[i]].x < xMin)
+        {
+            xMin = mesh.mVertices[face.mVerticesIndices[i]].x;
+            xMinIndices = face.minVecticesIndices[i];
+        }
+    }
+    face.minVecticesIndices[0] = xMinIndices;
+
+    // yMin
+    int yMinIndices = -1;
+    int yMin = std::numeric_limits<int>::min();
+    for (int i = 0; i < 3; i++)
+    {
+        if (mesh.mVertices[face.mVerticesIndices[i]].y < yMin)
+        {
+            yMin = mesh.mVertices[face.mVerticesIndices[i]].y;
+            yMinIndices = face.minVecticesIndices[i];
+        }
+    }
+    face.minVecticesIndices[1] = yMinIndices;
+
+    // zMin
+    int zMinIndices = -1;
+    int zMin = std::numeric_limits<int>::lowest();
+    for (int i = 0; i < 3; i++)
+    {
+        if (mesh.mVertices[face.mVeråticesIndices[i]].z < zMin)
+        {
+            zMin = mesh.mVertices[face.mVerticesIndices[i]].z;
+            zMinIndices = face.minVecticesIndices[i];
+        }
+    }
+    face.minVecticesIndices[2] = zMinIndices;
 }
