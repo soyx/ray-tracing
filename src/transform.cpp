@@ -2,40 +2,33 @@
 
 Transform::Transform() {}
 
-Transform::Transform(Mat4 m)
-{
+Transform::Transform(Mat4 m) {
     mat = m;
     inv = m.inverse();
 }
 
-Transform::Transform(Mat4 m, Mat4 inv)
-{
+Transform::Transform(Mat4 m, Mat4 inv) {
     this->mat = m;
     this->inv = inv;
 }
 
-Transform Transform::getMatrix() const
-{
+Transform Transform::getMatrix() const {
     return this->mat;
 }
 
-Transform Transform::getInverseMatrix() const
-{
+Transform Transform::getInverseMatrix() const {
     return this->inv;
 }
 
-Transform Transform::inverse() const
-{
+Transform Transform::inverse() const {
     return Transform(this->inv, this->mat);
 }
 
-Transform Transform::transpose() const
-{
+Transform Transform::transpose() const {
     return Transform(this->mat.transpose(), this->inv.transpose());
 }
 
-inline Point3f Transform::operator()(const Point3f &p) const
-{
+Point3f Transform::operator()(const Point3f &p) const {
     float xx = mat.m[0][0] * p.x + mat.m[0][1] * p.y + mat.m[0][2] * p.z + mat.m[0][3];
     float yy = mat.m[1][0] * p.x + mat.m[1][1] * p.y + mat.m[1][2] * p.z + mat.m[1][3];
     float zz = mat.m[2][0] * p.x + mat.m[2][1] * p.y + mat.m[2][2] * p.z + mat.m[2][3];
@@ -45,31 +38,29 @@ inline Point3f Transform::operator()(const Point3f &p) const
     else
         return Point3f(xx / ww, yy / ww, zz / ww);
 }
-inline Vector3f Transform::operator()(const Vector3f &v) const
-{
+
+Vector3f Transform::operator()(const Vector3f &v) const {
     return Vector3f(mat.m[0][0] * v.x + mat.m[0][1] * v.y + mat.m[0][2] * v.z,
                     mat.m[1][0] * v.x + mat.m[1][1] * v.y + mat.m[1][2] * v.z,
                     mat.m[2][0] * v.x + mat.m[2][1] * v.y + mat.m[3][2] * v.z);
 }
-inline Normal3f Transform::operator()(const Normal3f &n) const
-{
+
+Normal3f Transform::operator()(const Normal3f &n) const {
     return Normal3f(inv.m[0][0] * n.x + inv.m[1][0] * n.y + inv.m[2][0] * n.z,
                     inv.m[0][1] * n.x + inv.m[1][1] * n.y + inv.m[2][1] * n.z,
                     inv.m[0][2] * n.x + inv.m[1][2] * n.y + inv.m[2][2] * n.z);
 }
-inline Ray Transform::operator()(const Ray &r) const
-{
+
+Ray Transform::operator()(const Ray &r) const {
     // todo
     return Ray();
 }
 
-Transform Transform::operator*(const Transform &t2) const
-{
+Transform Transform::operator*(const Transform &t2) const {
     return Transform(mat * t2.mat, t2.inv * inv);
 }
 
-Transform translate(const Vector3f &delta)
-{
+Transform translate(const Vector3f &delta) {
     Mat4 mat(1, 0, 0, delta.x,
              0, 1, 0, delta.y,
              0, 0, 1, delta.z,
@@ -81,8 +72,7 @@ Transform translate(const Vector3f &delta)
     return Transform(mat, inv);
 }
 
-Transform scale(float x, float y, float z)
-{
+Transform scale(float x, float y, float z) {
     Mat4 mat(x, 0, 0, 0,
              0, y, 0, 0,
              0, 0, 0, z,
@@ -96,8 +86,7 @@ Transform scale(float x, float y, float z)
     return Transform(mat, inv);
 }
 
-Transform rotateX(float theta)
-{
+Transform rotateX(float theta) {
     float sinTheta = std::sinf(theta);
     float cosTheta = std::cosf(theta);
     Mat4 mat(1, 0, 0, 0,
@@ -112,8 +101,7 @@ Transform rotateX(float theta)
     return Transform(mat, inv);
 }
 
-Transform rotateY(float theta)
-{
+Transform rotateY(float theta) {
     float sinTheta = std::sinf(theta);
     float cosTheta = std::cosf(theta);
     Mat4 mat(cosTheta, 0, sinTheta, 0,
@@ -128,8 +116,7 @@ Transform rotateY(float theta)
     return Transform(mat, inv);
 }
 
-Transform rotateZ(float theta)
-{
+Transform rotateZ(float theta) {
     float sinTheta = std::sinf(theta);
     float cosTheta = std::cosf(theta);
     Mat4 mat(cosTheta, -sinTheta, 0, 0,
@@ -144,8 +131,7 @@ Transform rotateZ(float theta)
     return Transform(mat, inv);
 }
 
-Transform rotate(float theta, const Vector3f &axis)
-{
+Transform rotate(float theta, const Vector3f &axis) {
     Vector3f a = axis.normalize();
     float sinTheta = std::sinf(theta);
     float cosTheta = std::cosf(theta);
@@ -169,8 +155,7 @@ Transform rotate(float theta, const Vector3f &axis)
     return Transform(m, m.transpose());
 }
 
-Transform lookAt(const Point3f &pos, const Point3f &look, const Vector3f &up)
-{
+Transform lookAt(const Point3f &pos, const Point3f &look, const Vector3f &up) {
     Mat4 camera2World;
     camera2World.m[0][3] = pos.x;
     camera2World.m[1][3] = pos.y;
@@ -184,14 +169,25 @@ Transform lookAt(const Point3f &pos, const Point3f &look, const Vector3f &up)
     camera2World.m[0][0] = right.x;
     camera2World.m[1][0] = right.y;
     camera2World.m[2][0] = right.z;
-    camera2World.m[3][0] = 0.;
+    camera2World.m[3][0] = 0.f;
     camera2World.m[0][1] = newUp.x;
     camera2World.m[1][1] = newUp.y;
     camera2World.m[2][1] = newUp.z;
-    camera2World.m[3][1] = 0.;
+    camera2World.m[3][1] = 0.f;
     camera2World.m[0][2] = dir.x;
     camera2World.m[1][2] = dir.y;
     camera2World.m[2][2] = dir.z;
-    camera2World.m[3][2] = 0.;
+    camera2World.m[3][2] = 0.f;
     return Transform(camera2World.inverse(), camera2World);
+}
+
+Transform perspective(float fov, float n, float f) {
+    // Perform projective divide for perspective projection
+    Mat4 persp(1, 0, 0, 0,
+               0, 1, 0, 0,
+               0, 0, f / (f - n), -f * n / (f - n),
+               0, 0, 1, 0);
+    // Scale canonical perspective view to specified field of view
+    float invTanAng = 1 / std::tan((fov /180 * PI)/2);
+    return scale(invTanAng, invTanAng, 1) * Transform(persp);
 }

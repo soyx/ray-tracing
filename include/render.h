@@ -8,29 +8,40 @@
 #include "model.h"
 #include "camera.h"
 
-#define RANDNUM  std::rand() / (float)(RAND_MAX)
+#define RANDNUM std::rand() / (float)(RAND_MAX)
+
+struct Color{
+    Color(float r = 0, float g = 0, float b = 0):r(r), g(g), b(b){}
+    float r, g, b;
+};
+
 class Render
 {
-  public:
-    Render();
-    Render(Model &model);
+public:
+  Render();
+  Render(const Model &model, const Camera &camera);
 
-  private:
-    Ray generateRay(const Point3f &origin, const Vector3f &normal);
+  void run();
 
-    // setcolor
-    void getIntersection(const Ray &ray, Point3f &iPoint, Face &iFace);
-    
-    // receive a pdf to .
-    // todo
-    Vector3f sample(const Vector3f &normal);
+private:
+  void rayTrace(Point3f origin, Vector3f normal, Point3f &iPointLog, Color &color);
 
-    // generate random numbers according to the pdf;
-    float generateRandom();
+  Ray generateRay(const Point3f &origin, const Vector3f &normal);
 
-    Model renderModel;
+  // setcolor
+  void getIntersection(const Ray &ray, Point3f &iPoint, Face &iFace, bool &isLightSource);
 
-    
+  // receive a pdf to .
+  // todo
+  Vector3f sample(const Vector3f &normal);
+
+  // generate random numbers according to the pdf;
+  float generateRandom();
+
+  Model renderModel;
+
+  Camera camera;
 };
+
 
 #endif // RENDER_H

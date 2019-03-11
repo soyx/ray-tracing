@@ -11,7 +11,16 @@
 
 // Model->Scene->Mesh->Face
 
-struct Face{
+
+
+
+struct Face {
+
+    float a, b, c, d;
+
+    Vector3f faceNormal;
+
+    unsigned int meshId;
 
     int mVerticesIndices[3] = {-1, -1, -1};
     int mNormalsIndices[3] = {-1, -1, -1};
@@ -21,11 +30,10 @@ struct Face{
     int maxVecticesIndices[3] = {-1, -1, -1};
     int minVecticesIndices[3] = {-1, -1, -1};
 
-    std::string  materialName;
+    std::string materialName;
 };
 
-struct Mesh
-{
+struct Mesh {
     std::string name;
 
     int mNumVertices;
@@ -33,32 +41,34 @@ struct Mesh
     int mNumTextureCoords;
     int numFaces;
 
+    bool isLightSource = false;
+
     std::vector<Point3f> mVertices;
     std::vector<Vector3f> mNormals;
     std::vector<Point2f> mTextureCoords;
 
     std::vector<Face> faces;
-
 };
 
-struct Material
-{
+struct Material {
     std::string name;
 
     int illum;
 
-    Vector3f Kd, Ka, Tf, Ks;
+    float Kd[3], Ka[3], Tf[3], Ks[3];
 
     float Ni;
     float Ns;
 };
 
-struct Light
-{
+struct Light {
+    std::string groupname;
+    Point3f center;
+    float radius;
+    float Le[3];
 };
 
-struct Scene
-{
+struct Scene {
     int mNumMeshes;
     int mNumMaterials;
     int mNumLights;
@@ -70,23 +80,49 @@ struct Scene
     std::vector<Light> mLights;
 };
 
-class Model
-{
-  public:
-    Model();
-    Model(std::string objPath, std::string mtlPath = NULL);
+struct Config{
+    struct resolution{
+        int width;
+        int height;
+    }resolution;
 
-    bool load(std::string objpath, std::string mtlPath = NULL);
+    struct cameraparams{
+        Point3f position;
+        Vector3f lookat;
+        Vector3f up;
+        float fovy;
+    }cameraparams;
+
+    Light light;
+};
+
+class Model {
+public:
+    Model();
+
+    Model(std::string objPath, std::string mtlPath = "");
+
+    bool load(std::string objpath, std::string mtlPath = "", std::string cfgPath = "");
 
     Scene scene;
 
-    private:
+    Config config;
+
+private:
     bool loadObj(std::string objPath);
 
     bool loadMtl(std::string mtlPath);
 
+    bool loadCfg(std::string cfgPath);
+
     void getMaxIndices(Face &face, const Mesh &mesh);
+
     void getMinIndices(Face &face, const Mesh &mesh);
+
+    void computeFaceNormal(Face &face, const Mesh &mesh);
 };
+
+
+
 
 #endif // MODEL_H
