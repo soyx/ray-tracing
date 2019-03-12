@@ -24,12 +24,12 @@ public:
   void run();
 
 private:
-  void rayTrace(Point3f origin, Vector3f normal, Point3f &iPointLog, Color &color);
+  bool rayTrace(Point3f origin, Vector3f normal, Point3f &iPointLog, Color &color, int &debugDepth);
 
   Ray generateRay(const Point3f &origin, const Vector3f &normal);
 
   // setcolor
-  void getIntersection(const Ray &ray, Point3f &iPoint, Face &iFace, bool &isLightSource);
+  bool getIntersection(const Ray &ray, Point3f &iPoint, Face &iFace, bool &isLightSource);
 
   // receive a pdf to .
   // todo

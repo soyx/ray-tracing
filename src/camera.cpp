@@ -27,8 +27,14 @@ Camera::Camera(const Point3f position, const Vector3f up, const Point3f look, co
                                 1 / (screenWindow.pMin.y - screenWindow.pMax.y), 1) *
                           translate(Vector3f(-screenWindow.pMin.x, -screenWindow.pMax.y, 0));
     this->raster2Screen = screen2Raster.inverse();
-    camera2Screen = perspective(fovy, 1e-2f, 1000.f);
+    camera2Screen = perspective(fovy, 1e-2f, 10.f);
     this->raster2Camera = camera2Screen.inverse() * raster2Screen;
+    film.create(rasterHeight, rasterWidth, CV_8UC3);
+    for(int c = 0; c < rasterWidth; c++){
+        for(int r = 0; r < rasterHeight; r++){
+            film.at<cv::Vec3b>(r,c) = cv::Vec3b(0,0,0);
+        }
+    }
 
     srand((unsigned) time(NULL));
 }

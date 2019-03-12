@@ -103,17 +103,11 @@ bool Model::loadObj(std::string objPath) {
         if (lineBuf[0] == 'g') {
             // new mesh
             if (lineBuf == "g default") {
-                mesh.mNumVertices = mesh.mVertices.size();
-                mesh.mNumNormals = mesh.mNormals.size();
-                mesh.mNumTextureCoords = mesh.mTextureCoords.size();
                 mesh.numFaces = mesh.faces.size();
 
-                if (mesh.mNumVertices > 0)
+                if (mesh.numFaces > 0)
                     scene.mMeshes.push_back(mesh);
 
-                mesh.mNormals.clear();
-                mesh.mTextureCoords.clear();
-                mesh.mVertices.clear();
                 mesh.faces.clear();
                 mesh.name.clear();
             } else {
@@ -138,7 +132,7 @@ bool Model::loadObj(std::string objPath) {
             std::stringstream ss(data);
             float vx, vy, vz;
             ss >> vx >> vy >> vz;
-            mesh.mVertices.push_back(Point3f(vx, vy, vz));
+            scene.mVertices.push_back(Point3f(vx, vy, vz));
         }
 
         // normal
@@ -147,7 +141,7 @@ bool Model::loadObj(std::string objPath) {
             std::stringstream ss(data);
             float vnx, vny, vnz;
             ss >> vnx >> vny >> vnz;
-            mesh.mNormals.push_back(Vector3f(vnx, vny, vnz));
+            scene.mNormals.push_back(Vector3f(vnx, vny, vnz));
         }
 
         // texture coord
@@ -156,7 +150,7 @@ bool Model::loadObj(std::string objPath) {
             std::stringstream ss(data);
             float vtx, vty;
             ss >> vtx >> vty;
-            mesh.mTextureCoords.push_back(Point2f(vtx, vty));
+            scene.mTextureCoords.push_back(Point2f(vtx, vty));
         }
 
         // update mtl of face
@@ -414,7 +408,7 @@ bool Model::loadCfg(std::string cfgPath) {
             else if(lineBuf[0] == 'l'){
                 float lx, ly, lz;
                 ss >> lx >> ly >> lz;
-                config.cameraparams.lookat = Vector3f(lx, ly, lz);
+                config.cameraparams.lookat = Point3f(lx, ly, lz);
             }
             else if(lineBuf[0] == 'u'){
                 float ux, uy, uz;
@@ -454,34 +448,34 @@ void Model::getMaxIndices(Face &face, const Mesh &mesh) {
     int xMaxIndices = -1;
     float xMax = std::numeric_limits<float>::min();
     for (int i = 0; i < 3; i++) {
-        if (mesh.mVertices[face.mVerticesIndices[i]].x > xMax) {
-            xMax = mesh.mVertices[face.mVerticesIndices[i]].x;
-            xMaxIndices = face.maxVecticesIndices[i];
+        if (scene.mVertices[face.mVerticesIndices[i]].x > xMax) {
+            xMax = scene.mVertices[face.mVerticesIndices[i]].x;
+            xMaxIndices = face.mVerticesIndices[i];
         }
     }
-    face.maxVecticesIndices[0] = xMaxIndices;
+    face.maxVerticesIndices[0] = xMaxIndices;
 
     // yMax
     int yMaxIndices = -1;
     float yMax = std::numeric_limits<float>::min();
     for (int i = 0; i < 3; i++) {
-        if (mesh.mVertices[face.mVerticesIndices[i]].y > yMax) {
-            yMax = mesh.mVertices[face.mVerticesIndices[i]].y;
-            yMaxIndices = face.maxVecticesIndices[i];
+        if (scene.mVertices[face.mVerticesIndices[i]].y > yMax) {
+            yMax = scene.mVertices[face.mVerticesIndices[i]].y;
+            yMaxIndices = face.mVerticesIndices[i];
         }
     }
-    face.maxVecticesIndices[1] = yMaxIndices;
+    face.maxVerticesIndices[1] = yMaxIndices;
 
     // zMax
     int zMaxIndices = -1;
     float zMax = std::numeric_limits<float>::min();
     for (int i = 0; i < 3; i++) {
-        if (mesh.mVertices[face.mVerticesIndices[i]].z > zMax) {
-            zMax = mesh.mVertices[face.mVerticesIndices[i]].z;
-            zMaxIndices = face.maxVecticesIndices[i];
+        if (scene.mVertices[face.mVerticesIndices[i]].z > zMax) {
+            zMax = scene.mVertices[face.mVerticesIndices[i]].z;
+            zMaxIndices = face.mVerticesIndices[i];
         }
     }
-    face.maxVecticesIndices[2] = zMaxIndices;
+    face.maxVerticesIndices[2] = zMaxIndices;
 }
 
 void Model::getMinIndices(Face &face, const Mesh &mesh) {
@@ -489,47 +483,47 @@ void Model::getMinIndices(Face &face, const Mesh &mesh) {
     int xMinIndices = -1;
     float xMin = std::numeric_limits<float>::max();
     for (int i = 0; i < 3; i++) {
-        if (mesh.mVertices[face.mVerticesIndices[i]].x < xMin) {
-            xMin = mesh.mVertices[face.mVerticesIndices[i]].x;
-            xMinIndices = face.minVecticesIndices[i];
+        if (scene.mVertices[face.mVerticesIndices[i]].x < xMin) {
+            xMin = scene.mVertices[face.mVerticesIndices[i]].x;
+            xMinIndices = face.mVerticesIndices[i];
         }
     }
-    face.minVecticesIndices[0] = xMinIndices;
+    face.minVerticesIndices[0] = xMinIndices;
 
     // yMin
     int yMinIndices = -1;
     float yMin = std::numeric_limits<float>::max();
     for (int i = 0; i < 3; i++) {
-        if (mesh.mVertices[face.mVerticesIndices[i]].y < yMin) {
-            yMin = mesh.mVertices[face.mVerticesIndices[i]].y;
-            yMinIndices = face.minVecticesIndices[i];
+        if (scene.mVertices[face.mVerticesIndices[i]].y < yMin) {
+            yMin = scene.mVertices[face.mVerticesIndices[i]].y;
+            yMinIndices = face.mVerticesIndices[i];
         }
     }
-    face.minVecticesIndices[1] = yMinIndices;
+    face.minVerticesIndices[1] = yMinIndices;
 
     // zMin
     int zMinIndices = -1;
     float zMin = std::numeric_limits<float>::max();
     for (int i = 0; i < 3; i++) {
-        if (mesh.mVertices[face.mVerticesIndices[i]].z < zMin) {
-            zMin = mesh.mVertices[face.mVerticesIndices[i]].z;
-            zMinIndices = face.minVecticesIndices[i];
+        if (scene.mVertices[face.mVerticesIndices[i]].z < zMin) {
+            zMin = scene.mVertices[face.mVerticesIndices[i]].z;
+            zMinIndices = face.mVerticesIndices[i];
         }
     }
-    face.minVecticesIndices[2] = zMinIndices;
+    face.minVerticesIndices[2] = zMinIndices;
 }
 
 void Model::computeFaceNormal(Face &face, const Mesh &mesh) {
-    Point3f fv1 = mesh.mVertices[face.mVerticesIndices[0]];
-    Point3f fv2 = mesh.mVertices[face.mVerticesIndices[1]];
-    Point3f fv3 = mesh.mVertices[face.mVerticesIndices[2]];
+    Point3f fv1 = scene.mVertices[face.mVerticesIndices[0]];
+    Point3f fv2 = scene.mVertices[face.mVerticesIndices[1]];
+    Point3f fv3 = scene.mVertices[face.mVerticesIndices[2]];
 
     Vector3f fv12 = fv2 - fv1;
     Vector3f fv13 = fv3 - fv1;
 
     face.faceNormal = cross(fv12, fv13).normalize();
     // ensure the normal point to the outside
-    if (dot(mesh.mNormals[face.mNormalsIndices[0]], face.faceNormal) < 0)
+    if (dot(scene.mNormals[face.mNormalsIndices[0]], face.faceNormal) < 0)
         face.faceNormal = face.faceNormal * (-1);
 
     face.a = face.faceNormal.x;

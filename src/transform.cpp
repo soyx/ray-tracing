@@ -188,6 +188,6 @@ Transform perspective(float fov, float n, float f) {
                0, 0, f / (f - n), -f * n / (f - n),
                0, 0, 1, 0);
     // Scale canonical perspective view to specified field of view
-    float invTanAng = 1 / std::tan((fov /180 * PI)/2);
+    float invTanAng = 1 / std::tan((float)(fov /180 * PI)/2);
     return scale(invTanAng, invTanAng, 1) * Transform(persp);
 }

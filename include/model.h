@@ -27,8 +27,8 @@ struct Face {
     int mTextureCoordsIndices[3] = {-1, -1, -1};
 
     // {xMax, yMax, zMax}
-    int maxVecticesIndices[3] = {-1, -1, -1};
-    int minVecticesIndices[3] = {-1, -1, -1};
+    int maxVerticesIndices[3] = {-1, -1, -1};
+    int minVerticesIndices[3] = {-1, -1, -1};
 
     std::string materialName;
 };
@@ -36,16 +36,9 @@ struct Face {
 struct Mesh {
     std::string name;
 
-    int mNumVertices;
-    int mNumNormals;
-    int mNumTextureCoords;
     int numFaces;
 
     bool isLightSource = false;
-
-    std::vector<Point3f> mVertices;
-    std::vector<Vector3f> mNormals;
-    std::vector<Point2f> mTextureCoords;
 
     std::vector<Face> faces;
 };
@@ -73,11 +66,19 @@ struct Scene {
     int mNumMaterials;
     int mNumLights;
 
+    int mNumVertices;
+    int mNumNormals;
+    int mNumTextureCoords;
+
     std::map<std::string, int> mtlName2ID;
 
     std::vector<Mesh> mMeshes;
     std::vector<Material> mMaterials;
     std::vector<Light> mLights;
+
+    std::vector<Point3f> mVertices;
+    std::vector<Vector3f> mNormals;
+    std::vector<Point2f> mTextureCoords;
 };
 
 struct Config{
@@ -88,7 +89,7 @@ struct Config{
 
     struct cameraparams{
         Point3f position;
-        Vector3f lookat;
+        Point3f lookat;
         Vector3f up;
         float fovy;
     }cameraparams;

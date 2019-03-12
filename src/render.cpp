@@ -14,14 +14,17 @@ float normalPdf(Vector3f normal, float x) {
     return 0;
 }
 
-void Render::rayTrace(Point3f origin, Vector3f normal, Point3f &iPointLog, Color &color) {
+bool Render::rayTrace(Point3f origin, Vector3f normal, Point3f &iPointLog, Color &color, int &debugDepth) {
+    debugDepth++;
     Ray gRay = generateRay(origin, normal);
 
     bool isLightSource;
     Point3f iPoint;
     Face iFace;
 
-    getIntersection(gRay, iPoint, iFace, isLightSource);
+    bool iFlag = getIntersection(gRay, iPoint, iFace, isLightSource);
+
+    if (!iFlag) return false;
 
     // if intersection is a light source return;
     if (isLightSource) {
@@ -29,33 +32,47 @@ void Render::rayTrace(Point3f origin, Vector3f normal, Point3f &iPointLog, Color
         color.r = renderModel.scene.mLights[0].Le[0];
         color.g = renderModel.scene.mLights[0].Le[1];
         color.b = renderModel.scene.mLights[0].Le[2];
-        return;
+        return true;
     }
 
-    rayTrace(iPoint, iFace.faceNormal, iPointLog, color);
+    bool rFlag = rayTrace(iPoint, iFace.faceNormal, iPointLog, color, debugDepth);
+    if (!rFlag) return false;
 
     // save the intersection of current ray
     iPointLog = iPoint;
 
     // if intersection is not light source
-    color.r *= renderModel.scene.mMaterials[renderModel.scene.mtlName2ID[iFace.materialName]].Kd[0];
-    color.g *= renderModel.scene.mMaterials[renderModel.scene.mtlName2ID[iFace.materialName]].Kd[1];
-    color.b *= renderModel.scene.mMaterials[renderModel.scene.mtlName2ID[iFace.materialName]].Kd[2];
+    color.r = color.r * renderModel.scene.mMaterials[renderModel.scene.mtlName2ID[iFace.materialName]].Kd[0]
+              + color.r * renderModel.scene.mMaterials[renderModel.scene.mtlName2ID[iFace.materialName]].Ks[0];
+    color.g = color.g * renderModel.scene.mMaterials[renderModel.scene.mtlName2ID[iFace.materialName]].Kd[1]
+              + color.g * renderModel.scene.mMaterials[renderModel.scene.mtlName2ID[iFace.materialName]].Ks[1];
+    color.b = color.b * renderModel.scene.mMaterials[renderModel.scene.mtlName2ID[iFace.materialName]].Kd[2]
+              + color.g * renderModel.scene.mMaterials[renderModel.scene.mtlName2ID[iFace.materialName]].Ks[2];;
+
+    return true;
 }
 
 void Render::run() {
     float diffuse[3] = {1.f, 1.f, 1.f};
     Point3f cameraPos;
     Vector3f cameraDirect;
-    // 现在看来，camera需要有自己的generateRay以保存从camera出发光线与场景交点的颜色，trace第一个交点之后的光线
-    // todo
-    Color sampleColor;
-    Point3f iPoint;
-    rayTrace(camera.position, camera.look - camera.position, iPoint, sampleColor);
-    Point3f rasterPos;
-    rasterPos = (camera.raster2Camera.inverse() * camera.camera2World.inverse())(iPoint);
-    camera.film.at<cv::Vec3i>((int) rasterPos.y, (int) rasterPos.x) =
-            cv::Vec3i((int) sampleColor.b, (int) sampleColor.g, (int) sampleColor.r);
+    int maxI = 10;
+    for (int i = 0; i < maxI; i++) {
+
+        Color sampleColor;
+        Point3f iPoint;
+        int debugcnt = 0;
+        bool flag = rayTrace(camera.position, camera.look - camera.position, iPoint, sampleColor, debugcnt);
+        if (flag) {
+            Point3f rasterPos;
+            Transform world2Raster = camera.raster2Camera.inverse() * camera.camera2World.inverse();
+            rasterPos = world2Raster(iPoint);
+            camera.film.at<cv::Vec3b>((int) rasterPos.y, (int) rasterPos.x) =
+                    cv::Vec3b((uchar) sampleColor.b, (uchar) sampleColor.g, (uchar) sampleColor.r);
+            printf("process %d/%d---b %d g %d r %d\n", i, maxI, (int) sampleColor.b, (int) sampleColor.g, (int) sampleColor.r);
+        } else
+            i--;
+    }
 }
 
 Ray Render::generateRay(const Point3f &origin, const Vector3f &normal) {
@@ -76,44 +93,45 @@ Vector3f Render::sample(const Vector3f &normal) {
         sampleVec.y = RANDNUM;
         sampleVec.z = RANDNUM;
         if (normal.x > 0) {
-            sampleVec.x = -(sampleVec.y * normal.y + sampleVec.z * normal.z) + 0.5;
+            sampleVec.x = -(sampleVec.y * normal.y + sampleVec.z * normal.z) / normal.x + 0.5;
         } else {
-            sampleVec.x = -(sampleVec.y * normal.y + sampleVec.z * normal.z) - 0.5;
+            sampleVec.x = -(sampleVec.y * normal.y + sampleVec.z * normal.z) / normal.x - 0.5;
         }
     } else if (normal.y != 0) {
         sampleVec.x = RANDNUM;
         sampleVec.z = RANDNUM;
         if (normal.y > 0) {
-            sampleVec.y = -(sampleVec.x * normal.x + sampleVec.z * normal.z) + 0.5;
+            sampleVec.y = -(sampleVec.x * normal.x + sampleVec.z * normal.z) / normal.y + 0.5;
         } else {
-            sampleVec.y = -(sampleVec.x * normal.x + sampleVec.z * normal.z) - 0.5;
+            sampleVec.y = -(sampleVec.x * normal.x + sampleVec.z * normal.z) / normal.y - 0.5;
         }
     } else if (normal.z != 0) {
         sampleVec.x = RANDNUM;
         sampleVec.y = RANDNUM;
         if (normal.z > 0) {
-            sampleVec.z = -(sampleVec.x * normal.x + sampleVec.y * normal.y) + 0.5;
+            sampleVec.z = -(sampleVec.x * normal.x + sampleVec.y * normal.y) / normal.z + 0.5;
         } else {
-            sampleVec.z = -(sampleVec.x * normal.x + sampleVec.y * normal.y) - 0.5;
+            sampleVec.z = -(sampleVec.x * normal.x + sampleVec.y * normal.y) / normal.z - 0.5;
         }
     } else {
         std::cout << "ERROR: invalid normal" << std::endl;
     }
 
-    return sampleVec;
+    return sampleVec.normalize();
 }
 
-void Render::getIntersection(const Ray &ray, Point3f &iPoint, Face &iFace, bool &isLightSource) {
+bool Render::getIntersection(const Ray &ray, Point3f &iPoint, Face &iFace, bool &isLightSource) {
     float tMin = ray.tMax;
     isLightSource = false;
+    bool intersectionFlag = false;
     // intersection with mesh
     for (int i = 0; i < renderModel.scene.mNumMeshes; i++) {
         Mesh mesh = renderModel.scene.mMeshes[i];
         for (int j = 0; j < mesh.numFaces; j++) {
             Face face = mesh.faces[j];
             Vector3f rMax, rMin;
-            rMax = (mesh.mVertices[face.maxVecticesIndices[0]] - ray.o) / ray.d;
-            Vector3f temp = (mesh.mVertices[face.minVecticesIndices[0]] - ray.o) / ray.d;
+            rMax = (renderModel.scene.mVertices[face.maxVerticesIndices[0]] - ray.o) / ray.d;
+            Vector3f temp = (renderModel.scene.mVertices[face.minVerticesIndices[0]] - ray.o) / ray.d;
 
             if (temp.x > rMax.x) {
                 rMin.x = rMax.x;
@@ -156,15 +174,14 @@ void Render::getIntersection(const Ray &ray, Point3f &iPoint, Face &iFace, bool 
                 if (range12[1] >= range3[0] && range12[0] <= range3[1]) {
                     // detail process
                     // resolve equation
-                    // tode
                     if (dot(face.faceNormal, ray.d) == 0)
                         continue;
                     float t = -(face.a * ray.o.x + face.b * ray.o.y + face.c * ray.o.z + face.d) /
                               dot(face.faceNormal, ray.d);
                     Point3f pp = ray.o + ray.d * t;
-                    Point3f pa = mesh.mVertices[face.mVerticesIndices[0]];
-                    Point3f pb = mesh.mVertices[face.mVerticesIndices[1]];
-                    Point3f pc = mesh.mVertices[face.mVerticesIndices[2]];
+                    Point3f pa = renderModel.scene.mVertices[face.mVerticesIndices[0]];
+                    Point3f pb = renderModel.scene.mVertices[face.mVerticesIndices[1]];
+                    Point3f pc = renderModel.scene.mVertices[face.mVerticesIndices[2]];
 
                     Vector3f vab = pb - pa;
                     Vector3f vac = pc - pa;
@@ -177,6 +194,7 @@ void Render::getIntersection(const Ray &ray, Point3f &iPoint, Face &iFace, bool 
                         if (t < tMin) {
                             iFace = face;
                             iPoint = pp;
+                            intersectionFlag = true;
                         }
                     }
                 } else
@@ -188,4 +206,6 @@ void Render::getIntersection(const Ray &ray, Point3f &iPoint, Face &iFace, bool 
 
     // intersection with light source
     isLightSource = renderModel.scene.mMeshes[iFace.meshId].isLightSource;
+
+    return intersectionFlag;
 }
