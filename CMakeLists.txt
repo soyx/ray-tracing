@@ -10,11 +10,11 @@ find_package(OpenCV REQUIRED)
 
 include_directories(
         include
-        ${OPENCV_DIRS}
+#        ${OPENCV_DIRS}
 )
 
 aux_source_directory(${PROJECT_SOURCE_DIR}/src SRC_LIST)
 
-add_executable(${PROJECT_NAME} ${SRC_LIST} src/main.cpp)
+add_executable(${PROJECT_NAME} ${SRC_LIST} src/main.cpp include/shape.h  include/light/sphereLightSource.h include/light/lightSource.h src/light/sphereLightSource.cpp)
 
-target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+#target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})

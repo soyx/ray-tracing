@@ -4,8 +4,134 @@
 #include <limits>
 #include <cmath>
 
-#define INF std::numeric_limits<float>::infinity()
+#define INF std::numeric_limits<double>::infinity()
 #define PI 3.1415926
+
+template<typename T>
+class Vec2 {
+public:
+    T x, y;
+
+    T maxCor;
+
+    Vec2() {
+        x = y = 0;
+        maxCor = 0;
+    }
+
+    Vec2(T x, T y) : x(x), y(y) {
+        maxCor = x > y ? x : y;
+    }
+
+    Vec2<T> &operator=(const Vec2<T> &v) {
+        this->x = v.x;
+        this->y = v.y;
+        this->maxCor = v.maxCor;
+        return *this;
+    }
+
+    Vec2<T> operator+(const Vec2<T> v) const {
+        return Vec2(x + v.x, y + v.y);
+    }
+
+    Vec2<T> operator-(const Vec2<T> v) const {
+        return Vec2(x - v.x, y - v.y);
+    }
+
+    template<typename U>
+    Vec2<T> operator*(const U s) const {
+        return Vec2(x * s, y * s);
+    }
+
+    template<typename U>
+    Vec2<T> operator/(const U s) const {
+        return Vec2(x / s, y / s);
+    }
+
+    T operator[](int i) const {
+        if (i == 0) return x;
+        else return y;
+    }
+
+    T &operator[](int i) {
+        if (i == 0) return x;
+        else return y;
+    }
+
+
+};
+
+template<typename T>
+class Vec3 {
+public:
+    T x, y, z;
+
+    T maxCor;
+
+    Vec3() {
+        x = y = z = 0;
+        maxCor = 0;
+    }
+
+    Vec3(T x, T y, T z) : x(x), y(y), z(z) {
+        maxCor = x > y && x > z ? x : y > z ? y : z;
+    }
+
+    Vec3<T> &operator=(const Vec3<T> &v) {
+        this->x = v.x;
+        this->y = v.y;
+        this->z = v.z;
+        this->maxCor = v.maxCor;
+        return *this;
+    }
+
+    Vec3<T> operator+(const Vec3<T> v) const {
+        return Vec3<T>(x + v.x, y + v.y, z + v.z);
+    }
+
+    Vec3<T> operator-(const Vec3<T> v) const {
+        return Vec3<T>(x - v.x, y - v.y, z + v.z);
+    }
+
+    template<typename U>
+    Vec3<T> operator*(const U s) const {
+        return Vec3<T>(x * s, y * s, z * s);
+    }
+
+    template<typename U>
+    Vec3<T> operator/(const U s) const {
+        T temp = (T) (1. / s);
+        return Vec3(x * temp, y * temp, z * temp);
+    }
+
+    T operator[](int i) const {
+        if (i == 0) return x;
+        else if (i == 1) return y;
+        else
+            return z;
+    }
+
+    T &operator[](int i) {
+        if (i == 0) return x;
+        else if (i == 1) return y;
+        else
+            return z;
+    }
+};
+
+template<typename T>
+Vec2<T> mul(Vec2<T> v1, Vec2<T> v2) {
+    return Vec2<T>(v1.x * v2.x, v1.y * v2.y);
+}
+
+template<typename T>
+Vec3<T> mul(Vec3<T> v1, Vec3<T> v2) {
+    return Vec3<T>(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
+}
+
+
+using Vec2f = Vec2<double>;
+using Vec3f = Vec3<double>;
 
 // Vector
 template<typename T>
@@ -80,7 +206,7 @@ public:
         return *this;
     }
 
-    float getMagnitudeSquare() const {
+    double getMagnitudeSquare() const {
         return x * x + y * y;
     }
 
@@ -177,7 +303,7 @@ public:
         return *this;
     }
 
-    float getMagnitudeSquare() const {
+    double getMagnitudeSquare() const {
         return x * x + y * y + z * z;
     }
 
@@ -193,7 +319,7 @@ T dot(const Vector2<T> &v1, const Vector2<T> &v2) {
 
 template<typename T>
 T dot(const Vector3<T> &v1, const Vector3<T> &v2) {
-    return v1.x * v2.x + v1.y + v2.y + v1.z * v2.z;
+    return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 }
 
 template<typename T>
@@ -203,8 +329,8 @@ Vector3<T> cross(const Vector3<T> &v1, const Vector3<T> &v2) {
                       v1.x * v2.y - v1.y * v2.x);
 }
 
-using Vector2f = Vector2<float>;
-using Vector3f = Vector3<float>;
+using Vector2f = Vector2<double>;
+using Vector3f = Vector3<double>;
 
 // Point
 template<typename T>
@@ -267,7 +393,7 @@ public:
         z = p.z;
     }
 
-    Point3<T> &operator=(const Point3<T> &p){
+    Point3<T> &operator=(const Point3<T> &p) {
         this->x = p.x;
         this->y = p.y;
         this->z = p.z;
@@ -302,12 +428,12 @@ public:
 };
 
 template<typename T>
-float distanceSquare(const Point2<T> &p1, const Point2<T> &p2) {
+double distanceSquare(const Point2<T> &p1, const Point2<T> &p2) {
     return (p1 - p2).getMagnitudeSquare();
 }
 
-using Point2f = Point2<float>;
-using Point3f = Point3<float>;
+using Point2f = Point2<double>;
+using Point3f = Point3<double>;
 
 // Normal
 template<typename T>
@@ -319,7 +445,7 @@ public:
 
     Normal3(T x, T y, T z) : x(x), y(y), z(z) {}
 
-    Normal3<T> &operator=(const Normal3<T> n3) const {
+    Normal3<T> &operator=(const Normal3<T> n3) {
         this->x = n3.x;
         this->y = n3.y;
         this->z = n3.z;
@@ -327,7 +453,7 @@ public:
     }
 
     void normalize() {
-        float m = std::sqrt(getMagnitudeSquare());
+        double m = std::sqrt(getMagnitudeSquare());
         if (m > 0) {
             x /= m;
             y /= m;
@@ -335,7 +461,7 @@ public:
         }
     }
 
-    float getMagnitudeSquare() const {
+    double getMagnitudeSquare() const {
         return x * x + y * y + z * z;
     }
 };
@@ -345,7 +471,7 @@ T dot(Vector3<T> v, Normal3<T> n) {
     return v.x * n.x + v.y * n.y + v.z * n.z;
 }
 
-using Normal3f = Normal3<float>;
+using Normal3f = Normal3<double>;
 
 class Ray {
 public:
@@ -353,18 +479,11 @@ public:
     Point3f o;
     // direction of light
     Vector3f d;
-    // the max length of the light when the unit is the mag of the direction
-    mutable float tMax;
 
-    float time;
+    Ray(const Point3f &o, const Vector3f &d
+    ) : o(o), d(d) {}
 
-    Ray() : tMax(INF), time(0.f) {}
-
-    Ray(const Point3f &o, const Vector3f &d,
-        float tMax = INF, float time = 0.f)
-            : o(o), d(d), tMax(tMax), time(time) {}
-
-    Point3f operator()(float t) const {
+    Point3f operator()(double t) const {
         return o + d * t;
     }
 };
@@ -389,5 +508,5 @@ public:
     Point2<T> pMin, pMax;
 };
 
-using Bounds2f = Bounds2<float>;
+using Bounds2f = Bounds2<double>;
 #endif // UTIL_H

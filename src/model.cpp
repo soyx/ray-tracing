@@ -10,14 +10,14 @@ Model::Model(std::string objPath, std::string mtlPath) {
 }
 
 bool Model::load(std::string objPath, std::string mtlPath, std::string cfgPath) {
-    scene.mLights.clear();
+//    scene.mLights.clear();
     scene.mMaterials.clear();
     scene.mMeshes.clear();
     scene.mNumLights = 0;
     scene.mNumMaterials = 0;
     scene.mNumMeshes = 0;
 
-    if(cfgPath.empty()){
+    if (cfgPath.empty()) {
         cfgPath = objPath.substr(0, objPath.find_last_of('.'));
         cfgPath += ".cfg";
         std::cout << "use defualt config path:" << cfgPath << std::endl;
@@ -25,8 +25,7 @@ bool Model::load(std::string objPath, std::string mtlPath, std::string cfgPath) 
             std::cout << "ERROR: NO CFG FILE!" << std::endl;
             return false;
         }
-    }
-    else if(!loadCfg(cfgPath)){
+    } else if (!loadCfg(cfgPath)) {
         std::cout << "ERROR: NO CFG FILE!" << std::endl;
         return false;
     }
@@ -53,7 +52,7 @@ bool Model::load(std::string objPath, std::string mtlPath, std::string cfgPath) 
     scene.mNumMaterials = scene.mMaterials.size();
     scene.mNumMeshes = scene.mMeshes.size();
 
-    scene.mLights.push_back(config.light);
+//    scene.mLights.push_back(config.light);
 
     return true;
 }
@@ -113,12 +112,12 @@ bool Model::loadObj(std::string objPath) {
             } else {
                 std::string groupName = lineBuf.substr(2, lineBuf.size());
                 mesh.name = groupName;
-                if(mesh.name == config.light.groupname){
-                    mesh.isLightSource = true;
-                }
-                else{
-                    mesh.isLightSource = false;
-                }
+//                if(mesh.name == config.light.groupname){
+//                    mesh.isLightSource = true;
+//                }
+//                else{
+//                    mesh.isLightSource = false;
+//                }
             }
         }
 
@@ -130,7 +129,7 @@ bool Model::loadObj(std::string objPath) {
         if (lineBuf[0] == 'v' && lineBuf[1] == ' ') {
             std::string data = lineBuf.substr(2, lineBuf.size());
             std::stringstream ss(data);
-            float vx, vy, vz;
+            double vx, vy, vz;
             ss >> vx >> vy >> vz;
             scene.mVertices.push_back(Point3f(vx, vy, vz));
         }
@@ -139,7 +138,7 @@ bool Model::loadObj(std::string objPath) {
         if (lineBuf[0] == 'v' && lineBuf[1] == 'n') {
             std::string data = lineBuf.substr(3, lineBuf.size());
             std::stringstream ss(data);
-            float vnx, vny, vnz;
+            double vnx, vny, vnz;
             ss >> vnx >> vny >> vnz;
             scene.mNormals.push_back(Vector3f(vnx, vny, vnz));
         }
@@ -148,7 +147,7 @@ bool Model::loadObj(std::string objPath) {
         if (lineBuf[0] == 'v' && lineBuf[1] == 't') {
             std::string data = lineBuf.substr(3, lineBuf.size());
             std::stringstream ss(data);
-            float vtx, vty;
+            double vtx, vty;
             ss >> vtx >> vty;
             scene.mTextureCoords.push_back(Point2f(vtx, vty));
         }
@@ -187,17 +186,17 @@ bool Model::loadObj(std::string objPath) {
             for (int i = 0; i < 3; i++) {
                 // a//c
                 if (vertexData[i].find_last_of('/') - vertexData[i].find_first_of('/') == 1) {
-                    sscanf(vertexData[i].c_str(), "%d//%d", &face.mVerticesIndices[i], &face.mNormalsIndices[i]);
-                    face.mVerticesIndices[i]--;
-                    face.mNormalsIndices[i]--;
+                    sscanf(vertexData[i].c_str(), "%d//%d", &face.verticesIndices[i], &face.normalsIndices[i]);
+                    face.verticesIndices[i]--;
+                    face.normalsIndices[i]--;
                 }
                 // a/b/c
                 if (vertexData[i].find_last_of('/') - vertexData[i].find_first_of('/') > 1) {
-                    sscanf(vertexData[i].c_str(), "%d/%d/%d", &face.mVerticesIndices[i], &face.mTextureCoordsIndices[i],
-                           &face.mNormalsIndices[i]);
-                    face.mVerticesIndices[i]--;
-                    face.mTextureCoordsIndices[i]--;
-                    face.mNormalsIndices[i]--;
+                    sscanf(vertexData[i].c_str(), "%d/%d/%d", &face.verticesIndices[i], &face.textureCoordsIndices[i],
+                           &face.normalsIndices[i]);
+                    face.verticesIndices[i]--;
+                    face.textureCoordsIndices[i]--;
+                    face.normalsIndices[i]--;
                 }
             }
 
@@ -210,23 +209,23 @@ bool Model::loadObj(std::string objPath) {
 
             // convert origin faces to trigle faces
             for (int i = 3; i < vertexData.size(); i++) {
-                face.mVerticesIndices[1] = face.mVerticesIndices[2];
-                face.mNormalsIndices[1] = face.mNormalsIndices[2];
+                face.verticesIndices[1] = face.verticesIndices[2];
+                face.normalsIndices[1] = face.normalsIndices[2];
                 // a//c
                 if (vertexData[i].find_last_of('/') - vertexData[i].find_first_of('/') == 1) {
-                    sscanf(vertexData[i].c_str(), "%d//%d", &face.mVerticesIndices[2], &face.mNormalsIndices[2]);
+                    sscanf(vertexData[i].c_str(), "%d//%d", &face.verticesIndices[2], &face.normalsIndices[2]);
 
-                    face.mVerticesIndices[2]--;
-                    face.mNormalsIndices[2]--;
+                    face.verticesIndices[2]--;
+                    face.normalsIndices[2]--;
                 }
                 // a/b/c
                 if (vertexData[i].find_last_of('/') - vertexData[i].find_first_of('/') > 1) {
-                    face.mTextureCoordsIndices[1] = face.mTextureCoordsIndices[2];
-                    sscanf(vertexData[i].c_str(), "%d/%d/%d", &face.mVerticesIndices[2], &face.mTextureCoordsIndices[2],
-                           &face.mNormalsIndices[2]);
-                    face.mVerticesIndices[2]--;
-                    face.mTextureCoordsIndices[2]--;
-                    face.mNormalsIndices[2]--;
+                    face.textureCoordsIndices[1] = face.textureCoordsIndices[2];
+                    sscanf(vertexData[i].c_str(), "%d/%d/%d", &face.verticesIndices[2], &face.textureCoordsIndices[2],
+                           &face.normalsIndices[2]);
+                    face.verticesIndices[2]--;
+                    face.textureCoordsIndices[2]--;
+                    face.normalsIndices[2]--;
                 }
 
                 face.materialName = mtlName;
@@ -238,6 +237,10 @@ bool Model::loadObj(std::string objPath) {
             }
         }
     }
+    // last
+    mesh.numFaces = mesh.faces.size();
+    if (mesh.numFaces > 0)
+        scene.mMeshes.push_back(mesh);
 
     return true;
 }
@@ -303,6 +306,9 @@ bool Model::loadMtl(std::string mtlPath) {
             std::memset(material.Ks, 0, sizeof(material.Ks));
             std::memset(material.Tf, 0, sizeof(material.Tf));
             material.Ni = material.Ns = 0;
+
+            material.KSpecular = Vec3f();
+            material.KDiffuse = Vec3f();
         }
 
         if (lineBuf.substr(0, 6) == "illum") {
@@ -310,30 +316,37 @@ bool Model::loadMtl(std::string mtlPath) {
             sscanf(data.c_str(), "%d", &material.illum);
         }
 
-        if (lineBuf[0] == 'K' && lineBuf[1] == 'd')
-            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%f%f%f", material.Kd, material.Kd + 1,
-                   material.Kd + 2);
+        if (lineBuf[0] == 'K' && lineBuf[1] == 'd') {
+            double a, b, c;
+            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%lf%lf%lf", &a, &b, &c);
+            material.KDiffuse = Vec3f(a, b, c);
+        }
+
 
         if (lineBuf[0] == 'K' && lineBuf[1] == 'a')
-            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%f%f%f", material.Ka, material.Ka + 1,
+            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%lf%lf%lf", material.Ka, material.Ka + 1,
                    material.Ka + 2);
 
-        if (lineBuf[0] == 'K' && lineBuf[1] == 's')
-            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%f%f%f", material.Ks, material.Ks + 1,
-                   material.Ks + 2);
-
+        if (lineBuf[0] == 'K' && lineBuf[1] == 's') {
+            double a, b, c;
+            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%lf%lf%lf", &a, &b, &c);
+            material.KSpecular = Vec3f(a, b, c);
+        }
         if (lineBuf[0] == 'T' && lineBuf[1] == 'f')
-            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%f%f%f", material.Tf, material.Tf + 1,
+            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%lf%lf%lf", material.Tf, material.Tf + 1,
                    material.Tf + 2);
 
         if (lineBuf[0] == 'N' && lineBuf[1] == 's') {
-            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%f", &material.Ns);
+            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%lf", &material.Ns);
         }
 
         if (lineBuf[0] == 'N' && lineBuf[1] == 'i') {
-            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%f", &material.Ni);
+            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%lf", &material.Ni);
         }
     }
+    scene.mMaterials.push_back(material);
+    scene.mtlName2ID[material.name] = scene.mtlName2ID.size();
+
     return true;
 }
 
@@ -347,8 +360,12 @@ bool Model::loadCfg(std::string cfgPath) {
     std::string lineBuf;
     bool cameraParamsFlag = false;
     bool lightFlag = false;
-    while(getline(ifs, lineBuf))
-    {
+
+    Point3f p;
+    double radius;
+    Vec3f emission;
+
+    while (getline(ifs, lineBuf)) {
         std::cout << "Read from file: " << lineBuf << std::endl;
 
         if (!lineBuf.empty())
@@ -385,60 +402,72 @@ bool Model::loadCfg(std::string cfgPath) {
 
         if (lineBuf.substr(0, lineBuf.find_first_of(' ')) == "resolution")
             sscanf(lineBuf.substr(lineBuf.find_first_of(' ') + 1, lineBuf.size()).c_str(),
-                    "%d*%d", &config.resolution.width, &config.resolution.height);
+                   "%d*%d", &config.resolution.width, &config.resolution.height);
 
-        else if(lineBuf == "cameraparams"){
+        else if (lineBuf == "cameraparams") {
+            if (lightFlag) {
+                config.sphereLights.push_back(SphereLightSource(radius, p, emission));
+            }
             cameraParamsFlag = true;
             lightFlag = false;
-        }
-        else if(lineBuf == "light")
-        {
+            radius = 0;
+            p = Point3f();
+            emission = Vec3f();
+        } else if (lineBuf == "light") {
+            if (lightFlag)
+                config.sphereLights.push_back(SphereLightSource(radius, p, emission));
             lightFlag = true;
             cameraParamsFlag = false;
+            radius = 0;
+            p = Point3f();
+            emission = Vec3f();
         }
 
-        if(cameraParamsFlag && !lightFlag){
+        if (cameraParamsFlag && !lightFlag) {
             std::string data = lineBuf.substr(lineBuf.find_first_of(' ') + 1);
             std::stringstream ss(data);
-            if(lineBuf[0] == 'p'){
-                float px, py, pz;
+            if (lineBuf[0] == 'p') {
+                double px, py, pz;
                 ss >> px >> py >> pz;
                 config.cameraparams.position = Point3f(px, py, pz);
-            }
-            else if(lineBuf[0] == 'l'){
-                float lx, ly, lz;
+            } else if (lineBuf[0] == 'l') {
+                double lx, ly, lz;
                 ss >> lx >> ly >> lz;
                 config.cameraparams.lookat = Point3f(lx, ly, lz);
-            }
-            else if(lineBuf[0] == 'u'){
-                float ux, uy, uz;
+            } else if (lineBuf[0] == 'u') {
+                double ux, uy, uz;
                 ss >> ux >> uy >> uz;
                 config.cameraparams.up = Vector3f(ux, uy, uz);
-            }
-            else if(lineBuf[0] == 'f'){
+            } else if (lineBuf[0] == 'f') {
                 ss >> config.cameraparams.fovy;
             }
         }
 
-        if(lightFlag && !cameraParamsFlag){
+        if (lightFlag && !cameraParamsFlag) {
             std::string data = lineBuf.substr(lineBuf.find_first_of(' ') + 1);
             std::stringstream ss(data);
-            if(lineBuf[0] == 'g'){
-                ss >> config.light.groupname;
-            }
-            else if(lineBuf[0] == 'c'){
-                float cx, cy, cz;
+//            if(lineBuf[0] == 'g'){
+//                ss >> config.light.groupname;
+//            }
+
+            if (lineBuf[0] == 'c') {
+                double cx, cy, cz;
                 ss >> cx >> cy >> cz;
-                config.light.center = Point3f(cx, cy, cz);
+                p = Point3f(cx, cy, cz);
+//                config.light.center = Point3f(cx, cy, cz);
+            } else if (lineBuf[0] == 'r') {
+                ss >> radius;
+            } else if (lineBuf[0] == 'L') {
+                double ex, ey, ez;
+                ss >> ex >> ey >> ez;
+                emission = Vec3f(ex, ey, ez);
             }
-            else if(lineBuf[0] == 'r'){
-                ss >> config.light.radius;
-            }
-            else if(lineBuf[0] == 'L'){
-                ss >> config.light.Le[0] >> config.light.Le[1] >> config.light.Le[2];
-            }
+
+
         }
     }
+    if (lightFlag)
+        config.sphereLights.push_back(SphereLightSource(radius, p, emission));
 
     return true;
 }
@@ -446,84 +475,88 @@ bool Model::loadCfg(std::string cfgPath) {
 void Model::getMaxIndices(Face &face, const Mesh &mesh) {
     // xMax
     int xMaxIndices = -1;
-    float xMax = std::numeric_limits<float>::min();
+    double xMax = -std::numeric_limits<double>().max();
     for (int i = 0; i < 3; i++) {
-        if (scene.mVertices[face.mVerticesIndices[i]].x > xMax) {
-            xMax = scene.mVertices[face.mVerticesIndices[i]].x;
-            xMaxIndices = face.mVerticesIndices[i];
+        if (scene.mVertices[face.verticesIndices[i]].x > xMax) {
+            xMax = scene.mVertices[face.verticesIndices[i]].x;
+            xMaxIndices = face.verticesIndices[i];
         }
     }
     face.maxVerticesIndices[0] = xMaxIndices;
 
     // yMax
     int yMaxIndices = -1;
-    float yMax = std::numeric_limits<float>::min();
+    double yMax = -std::numeric_limits<double>().max();
     for (int i = 0; i < 3; i++) {
-        if (scene.mVertices[face.mVerticesIndices[i]].y > yMax) {
-            yMax = scene.mVertices[face.mVerticesIndices[i]].y;
-            yMaxIndices = face.mVerticesIndices[i];
+        if (scene.mVertices[face.verticesIndices[i]].y > yMax) {
+            yMax = scene.mVertices[face.verticesIndices[i]].y;
+            yMaxIndices = face.verticesIndices[i];
         }
     }
     face.maxVerticesIndices[1] = yMaxIndices;
 
     // zMax
     int zMaxIndices = -1;
-    float zMax = std::numeric_limits<float>::min();
+    double zMax = -std::numeric_limits<double>().max();
     for (int i = 0; i < 3; i++) {
-        if (scene.mVertices[face.mVerticesIndices[i]].z > zMax) {
-            zMax = scene.mVertices[face.mVerticesIndices[i]].z;
-            zMaxIndices = face.mVerticesIndices[i];
+        if (scene.mVertices[face.verticesIndices[i]].z > zMax) {
+            zMax = scene.mVertices[face.verticesIndices[i]].z;
+            zMaxIndices = face.verticesIndices[i];
         }
     }
     face.maxVerticesIndices[2] = zMaxIndices;
+    if (face.maxVerticesIndices[0] == -1 || face.maxVerticesIndices[1] == -1 || face.maxVerticesIndices[2] == -1)
+        printf("DEBUG: maxVertices error!\n");
 }
 
 void Model::getMinIndices(Face &face, const Mesh &mesh) {
     // xMin
     int xMinIndices = -1;
-    float xMin = std::numeric_limits<float>::max();
+    double xMin = std::numeric_limits<double>::max();
     for (int i = 0; i < 3; i++) {
-        if (scene.mVertices[face.mVerticesIndices[i]].x < xMin) {
-            xMin = scene.mVertices[face.mVerticesIndices[i]].x;
-            xMinIndices = face.mVerticesIndices[i];
+        if (scene.mVertices[face.verticesIndices[i]].x < xMin) {
+            xMin = scene.mVertices[face.verticesIndices[i]].x;
+            xMinIndices = face.verticesIndices[i];
         }
     }
     face.minVerticesIndices[0] = xMinIndices;
 
     // yMin
     int yMinIndices = -1;
-    float yMin = std::numeric_limits<float>::max();
+    double yMin = std::numeric_limits<double>::max();
     for (int i = 0; i < 3; i++) {
-        if (scene.mVertices[face.mVerticesIndices[i]].y < yMin) {
-            yMin = scene.mVertices[face.mVerticesIndices[i]].y;
-            yMinIndices = face.mVerticesIndices[i];
+        if (scene.mVertices[face.verticesIndices[i]].y < yMin) {
+            yMin = scene.mVertices[face.verticesIndices[i]].y;
+            yMinIndices = face.verticesIndices[i];
         }
     }
     face.minVerticesIndices[1] = yMinIndices;
 
     // zMin
     int zMinIndices = -1;
-    float zMin = std::numeric_limits<float>::max();
+    double zMin = std::numeric_limits<double>::max();
     for (int i = 0; i < 3; i++) {
-        if (scene.mVertices[face.mVerticesIndices[i]].z < zMin) {
-            zMin = scene.mVertices[face.mVerticesIndices[i]].z;
-            zMinIndices = face.mVerticesIndices[i];
+        if (scene.mVertices[face.verticesIndices[i]].z < zMin) {
+            zMin = scene.mVertices[face.verticesIndices[i]].z;
+            zMinIndices = face.verticesIndices[i];
         }
     }
     face.minVerticesIndices[2] = zMinIndices;
+    if (face.maxVerticesIndices[0] == -1 || face.maxVerticesIndices[1] == -1 || face.maxVerticesIndices[2] == -1)
+        printf("DEBUG: maxVertices error!\n");
 }
 
 void Model::computeFaceNormal(Face &face, const Mesh &mesh) {
-    Point3f fv1 = scene.mVertices[face.mVerticesIndices[0]];
-    Point3f fv2 = scene.mVertices[face.mVerticesIndices[1]];
-    Point3f fv3 = scene.mVertices[face.mVerticesIndices[2]];
+    Point3f fv1 = scene.mVertices[face.verticesIndices[0]];
+    Point3f fv2 = scene.mVertices[face.verticesIndices[1]];
+    Point3f fv3 = scene.mVertices[face.verticesIndices[2]];
 
     Vector3f fv12 = fv2 - fv1;
     Vector3f fv13 = fv3 - fv1;
 
     face.faceNormal = cross(fv12, fv13).normalize();
     // ensure the normal point to the outside
-    if (dot(scene.mNormals[face.mNormalsIndices[0]], face.faceNormal) < 0)
+    if (dot(scene.mNormals[face.normalsIndices[0]], face.faceNormal) < 0)
         face.faceNormal = face.faceNormal * (-1);
 
     face.a = face.faceNormal.x;

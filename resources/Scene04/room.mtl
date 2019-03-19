@@ -1,0 +1,12 @@
+newmtl grey
+Kd 0.75 0.75 0.75
+Ks 0.00 0.00 0.00
+newmtl red
+Kd 0.98 0.00 0.00
+Ks 0.00 0.00 0.00
+newmtl blue
+Kd 0.00 0.00 0.98
+Ks 0.00 0.00 0.00
+newmtl black
+Kd 0.00 0.00 0.00
+Ks 0.00 0.00 0.00

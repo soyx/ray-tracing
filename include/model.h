@@ -8,27 +8,32 @@
 #include <fstream>
 #include <sstream>
 #include <map>
+#include "light/sphereLightSource.h"
 
 // Model->Scene->Mesh->Face
 
-
-
-
 struct Face {
 
-    float a, b, c, d;
+    double a, b, c, d;
 
     Vector3f faceNormal;
 
     unsigned int meshId;
+    Vec3f emission;
 
-    int mVerticesIndices[3] = {-1, -1, -1};
-    int mNormalsIndices[3] = {-1, -1, -1};
-    int mTextureCoordsIndices[3] = {-1, -1, -1};
+    Vec3<int> verticesIndices;
+    Vec3<int> normalsIndices;
+    Vec2<int> textureCoordsIndices;
+
+//    int mVerticesIndices[3] = {-1, -1, -1};
+//    int mNormalsIndices[3] = {-1, -1, -1};
+//    int mTextureCoordsIndices[3] = {-1, -1, -1};
 
     // {xMax, yMax, zMax}
-    int maxVerticesIndices[3] = {-1, -1, -1};
-    int minVerticesIndices[3] = {-1, -1, -1};
+    Vec3<int> maxVerticesIndices;
+    Vec3<int> minVerticesIndices;
+//    int maxVerticesIndices[3] = {-1, -1, -1};
+//    int minVerticesIndices[3] = {-1, -1, -1};
 
     std::string materialName;
 };
@@ -38,8 +43,6 @@ struct Mesh {
 
     int numFaces;
 
-    bool isLightSource = false;
-
     std::vector<Face> faces;
 };
 
@@ -48,18 +51,20 @@ struct Material {
 
     int illum;
 
-    float Kd[3], Ka[3], Tf[3], Ks[3];
+    double Kd[3], Ka[3], Tf[3], Ks[3];
+    Vec3f KDiffuse;
+    Vec3f KSpecular;
 
-    float Ni;
-    float Ns;
+    double Ni;
+    double Ns;
 };
 
-struct Light {
-    std::string groupname;
-    Point3f center;
-    float radius;
-    float Le[3];
-};
+//struct Light {
+//    std::string groupname;
+//    Point3f center;
+//    double radius;
+//    double Le[3];
+//};
 
 struct Scene {
     int mNumMeshes;
@@ -74,7 +79,7 @@ struct Scene {
 
     std::vector<Mesh> mMeshes;
     std::vector<Material> mMaterials;
-    std::vector<Light> mLights;
+//    std::vector<LightSource> mLights;
 
     std::vector<Point3f> mVertices;
     std::vector<Vector3f> mNormals;
@@ -91,10 +96,10 @@ struct Config{
         Point3f position;
         Point3f lookat;
         Vector3f up;
-        float fovy;
+        double fovy;
     }cameraparams;
 
-    Light light;
+    std::vector<SphereLightSource> sphereLights;
 };
 
 class Model {

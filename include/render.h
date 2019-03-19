@@ -1,5 +1,6 @@
 #ifndef RENDER_H
 #define RENDER_H
+
 #include <ctime>
 #include <cstdlib>
 #include <cmath>
@@ -8,39 +9,48 @@
 #include "model.h"
 #include "camera.h"
 
-#define RANDNUM std::rand() / (float)(RAND_MAX)
+#define RANDNUM std::rand() / (double)(RAND_MAX)
 
-struct Color{
-    Color(float r = 0, float g = 0, float b = 0):r(r), g(g), b(b){}
-    float r, g, b;
+struct Color {
+    Color(double r = 0, double g = 0, double b = 0) : r(r), g(g), b(b) {}
+
+    double r, g, b;
 };
 
-class Render
-{
+class Render {
 public:
-  Render();
-  Render(const Model &model, const Camera &camera);
+//    Render();
 
-  void run();
+    Render(Model &model, Camera &camera, const int sampleNum = 50,
+           const Vec2<int> imageSize = Vec2<int>(800, 600));
+
+    void run();
 
 private:
-  bool rayTrace(Point3f origin, Vector3f normal, Point3f &iPointLog, Color &color, int &debugDepth);
 
-  Ray generateRay(const Point3f &origin, const Vector3f &normal);
+    double intersect(const Face &face, const Ray &ray);
 
-  // setcolor
-  bool getIntersection(const Ray &ray, Point3f &iPoint, Face &iFace, bool &isLightSource);
+    Vec3f radiance(const Ray &ray, int depth);
 
-  // receive a pdf to .
-  // todo
-  Vector3f sample(const Vector3f &normal);
+//  bool rayTrace(Point3f origin, Vector3f normal, Point3f &iPointLog, Color &color, int &debugDepth);
 
-  // generate random numbers according to the pdf;
-  float generateRandom();
+//  Ray generateRay(const Point3f &origin, const Vector3f &normal);
 
-  Model renderModel;
+    // setcolor
+//  bool getIntersection(const Ray &ray, Point3f &iPoint, Face &iFace, bool &isLightSource);
 
-  Camera camera;
+    // receive a pdf to .
+    // todo
+//  Vector3f sample(const Vector3f &normal);
+
+    // generate random numbers according to the pdf;
+//  double generateRandom();
+
+    Model &renderModel;
+
+    Camera &camera;
+
+    int sampleNum;
 };
 
 
