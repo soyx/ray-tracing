@@ -308,11 +308,6 @@ bool Model::loadMtl(std::string mtlPath) {
             }
             material.name = lineBuf.substr(7, lineBuf.size() - 1);
             material.illum = 0;
-            // only 0 is correct
-            std::memset(material.Kd, 0, sizeof(material.Kd));
-            std::memset(material.Ka, 0, sizeof(material.Ka));
-            std::memset(material.Ks, 0, sizeof(material.Ks));
-            std::memset(material.Tf, 0, sizeof(material.Tf));
             material.Ni = material.Ns = 0;
             material.KSpecular = Vec3f();
             material.KDiffuse = Vec3f();

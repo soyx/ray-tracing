@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <cmath>
+#include <cstring>
 
 class Mat4
 {

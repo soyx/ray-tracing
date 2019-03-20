@@ -23,8 +23,8 @@ int main(int argc, char *argv[]) {
 //    Camera camera(Point3f(50, 60,160), Vector3f(0,1,0), Point3f(50 ,30, 0), 100);
 //    Camera camera(Point3f(50, 45, 170), Point3f(50, 30, 0), Vector3f(0, 1, 0), 10);
 
-    int width = 400;
-    int height = 300;
+    int width = 800;
+    int height = 600;
     double fovy = 60.0 / 180 * M_PI;
     double focal = 5;
 
