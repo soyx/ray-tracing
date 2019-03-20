@@ -166,20 +166,20 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
         }
     }
 
-    Vec3f rgbColor(0, 0, 0);
+    Vec3f xyzColor(0, 0, 0);
     if (id < 0)
-        return rgbColor;
+        return xyzColor;
 
     // obj meshes
     if (interType == FACE) {
         Material material = renderModel.scene.mMaterials[renderModel.scene.mtlName2ID[face.materialName]];
         if (depth > 5) {
             if (depth > 10) {
-                return rgbColor;
+                return xyzColor;
             }
             double rNum = (RANDNUM);
             if (material.KDiffuse.maxCor < rNum && material.KSpecular.maxCor < rNum) {
-                return rgbColor;
+                return xyzColor;
             }
         }
 
@@ -205,23 +205,23 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
 
             Vector3f d = (u * std::cos(r1) * r2s + v * std::sin(r1) * r2s + w * std::sqrt(1 - r2)).normalize();
 
-            rgbColor = rgbColor + mul(material.KDiffuse, radiance(Ray(p, d), ++depth));
+            xyzColor = xyzColor + mul(material.KDiffuse, radiance(Ray(p, d), ++depth));
         }
 
         if (material.KSpecular.maxCor > 1e-10) {
-            rgbColor = rgbColor + mul(material.KSpecular, radiance(Ray(p, ray.d - n * 2 * dot(n, ray.d)), ++depth));
+            xyzColor = xyzColor + mul(material.KSpecular, radiance(Ray(p, ray.d - n * 2 * dot(n, ray.d)), ++depth));
         }
     }
         // other shapes
     else if (interType == LIGHTSOURCE) {
         SphereLightSource light = renderModel.config.sphereLights[id];
-        rgbColor = rgbColor + light.emission;
+        xyzColor = xyzColor + light.emission;
         if (depth > 5) {
             if (depth > 10)
-                return rgbColor;
+                return xyzColor;
             double rNum = (RANDNUM);
             if (light.KDiffuse.maxCor < rNum && light.KSpecular.maxCor < rNum) {
-                return rgbColor;
+                return xyzColor;
             }
         }
         Point3f p = ray.o + ray.d * t;
@@ -246,15 +246,15 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
 
             Vector3f d = (u * std::cos(r1) * r2s + v * std::sin(r1) * r2s + w * std::sqrt(1 - r2)).normalize();
 
-            rgbColor = rgbColor + mul(light.KDiffuse, radiance(Ray(p, d), ++depth));
+            xyzColor = xyzColor + mul(light.KDiffuse, radiance(Ray(p, d), ++depth));
         }
 
         if (light.KSpecular.maxCor > 1e-10) {
-            rgbColor = rgbColor + mul(light.KSpecular, radiance(Ray(p, ray.d - n * 2 * dot(n, ray.d)), ++depth));
+            xyzColor = xyzColor + mul(light.KSpecular, radiance(Ray(p, ray.d - n * 2 * dot(n, ray.d)), ++depth));
         }
     }
 
-    return rgbColor;
+    return xyzColor;
 }
 
 /*
