@@ -112,8 +112,8 @@ Transform rotateY(double theta) {
 }
 
 Transform rotateZ(double theta) {
-    double sinTheta = std::sinf(theta);
-    double cosTheta = std::cosf(theta);
+    double sinTheta = std::sin(theta);
+    double cosTheta = std::cos(theta);
     Mat4 mat(cosTheta, -sinTheta, 0, 0,
              sinTheta, cosTheta, 0, 0,
              0, 0, 1, 0,
@@ -128,8 +128,8 @@ Transform rotateZ(double theta) {
 
 Transform rotate(double theta, const Vector3f &axis) {
     Vector3f a = axis.normalize();
-    double sinTheta = std::sinf(theta);
-    double cosTheta = std::cosf(theta);
+    double sinTheta = std::sin(theta);
+    double cosTheta = std::cos(theta);
     Mat4 m;
     // Compute rotation of first basis vector
     m.m[0][0] = a.x * a.x + (1 - a.x * a.x) * cosTheta;

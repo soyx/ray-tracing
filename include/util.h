@@ -211,7 +211,7 @@ public:
     }
 
     Vector2<T> normalize() const {
-        return (*this) / std::sqrtf(getMagnitudeSquare());
+        return (*this) / std::sqrt(getMagnitudeSquare());
     }
 };
 
@@ -308,7 +308,7 @@ public:
     }
 
     Vector3<T> normalize() const {
-        return (*this) / std::sqrtf(getMagnitudeSquare());
+        return (*this) / std::sqrt(getMagnitudeSquare());
     }
 };
 
@@ -480,8 +480,7 @@ public:
     // direction of light
     Vector3f d;
 
-    Ray(const Point3f &o, const Vector3f &d
-    ) : o(o), d(d) {}
+    Ray(const Point3f &o, const Vector3f &d) : o(o), d(d) {}
 
     Point3f operator()(double t) const {
         return o + d * t;

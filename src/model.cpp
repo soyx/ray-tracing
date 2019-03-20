@@ -10,7 +10,6 @@ Model::Model(std::string objPath, std::string mtlPath) {
 }
 
 bool Model::load(std::string objPath, std::string mtlPath, std::string cfgPath) {
-//    scene.mLights.clear();
     scene.mMaterials.clear();
     scene.mMeshes.clear();
     scene.mNumLights = 0;
@@ -51,9 +50,6 @@ bool Model::load(std::string objPath, std::string mtlPath, std::string cfgPath) 
 
     scene.mNumMaterials = scene.mMaterials.size();
     scene.mNumMeshes = scene.mMeshes.size();
-
-//    scene.mLights.push_back(config.light);
-
     return true;
 }
 
@@ -67,6 +63,8 @@ bool Model::loadObj(std::string objPath) {
     std::string lineBuf;
     Mesh mesh;
     std::string mtlName = "default";
+    mesh.maxVertices = Vec3f(-INF, -INF, -INF);
+    mesh.minVertices = Vec3f(INF, INF, INF);
     while (getline(ifs, lineBuf)) {
         std::cout << "Read from file: " << lineBuf << std::endl;
 
@@ -107,17 +105,14 @@ bool Model::loadObj(std::string objPath) {
                 if (mesh.numFaces > 0)
                     scene.mMeshes.push_back(mesh);
 
+                mesh.maxVertices = Vec3f(-INF, -INF, -INF);
+                mesh.minVertices = Vec3f(INF, INF, INF);
+
                 mesh.faces.clear();
                 mesh.name.clear();
             } else {
                 std::string groupName = lineBuf.substr(2, lineBuf.size());
                 mesh.name = groupName;
-//                if(mesh.name == config.light.groupname){
-//                    mesh.isLightSource = true;
-//                }
-//                else{
-//                    mesh.isLightSource = false;
-//                }
             }
         }
 
@@ -132,6 +127,19 @@ bool Model::loadObj(std::string objPath) {
             double vx, vy, vz;
             ss >> vx >> vy >> vz;
             scene.mVertices.push_back(Point3f(vx, vy, vz));
+
+            if (vx > mesh.maxVertices.x)
+                mesh.maxVertices.x = vx;
+            if (vy > mesh.maxVertices.y)
+                mesh.maxVertices.y = vy;
+            if (vz > mesh.maxVertices.z)
+                mesh.maxVertices.z = vz;
+            if (vx < mesh.minVertices.x)
+                mesh.minVertices.x = vx;
+            if (vy < mesh.minVertices.y)
+                mesh.minVertices.y = vy;
+            if (vz < mesh.minVertices.z)
+                mesh.minVertices.z = vz;
         }
 
         // normal
@@ -295,8 +303,8 @@ bool Model::loadMtl(std::string mtlPath) {
             if (!material.name.empty()) {
                 scene.mMaterials.push_back(material);
                 // map
-
-                scene.mtlName2ID[material.name] = scene.mtlName2ID.size();
+                unsigned long s = scene.mtlName2ID.size();
+                scene.mtlName2ID[material.name] = (int) s;
             }
             material.name = lineBuf.substr(7, lineBuf.size() - 1);
             material.illum = 0;
@@ -306,7 +314,6 @@ bool Model::loadMtl(std::string mtlPath) {
             std::memset(material.Ks, 0, sizeof(material.Ks));
             std::memset(material.Tf, 0, sizeof(material.Tf));
             material.Ni = material.Ns = 0;
-
             material.KSpecular = Vec3f();
             material.KDiffuse = Vec3f();
         }
@@ -345,7 +352,8 @@ bool Model::loadMtl(std::string mtlPath) {
         }
     }
     scene.mMaterials.push_back(material);
-    scene.mtlName2ID[material.name] = scene.mtlName2ID.size();
+    unsigned long s = scene.mtlName2ID.size();
+    scene.mtlName2ID[material.name] = (int) s;
 
     return true;
 }
@@ -446,15 +454,12 @@ bool Model::loadCfg(std::string cfgPath) {
         if (lightFlag && !cameraParamsFlag) {
             std::string data = lineBuf.substr(lineBuf.find_first_of(' ') + 1);
             std::stringstream ss(data);
-//            if(lineBuf[0] == 'g'){
-//                ss >> config.light.groupname;
-//            }
+
 
             if (lineBuf[0] == 'c') {
                 double cx, cy, cz;
                 ss >> cx >> cy >> cz;
                 p = Point3f(cx, cy, cz);
-//                config.light.center = Point3f(cx, cy, cz);
             } else if (lineBuf[0] == 'r') {
                 ss >> radius;
             } else if (lineBuf[0] == 'L') {
@@ -475,7 +480,7 @@ bool Model::loadCfg(std::string cfgPath) {
 void Model::getMaxIndices(Face &face, const Mesh &mesh) {
     // xMax
     int xMaxIndices = -1;
-    double xMax = -std::numeric_limits<double>().max();
+    double xMax = -std::numeric_limits<double>::max();
     for (int i = 0; i < 3; i++) {
         if (scene.mVertices[face.verticesIndices[i]].x > xMax) {
             xMax = scene.mVertices[face.verticesIndices[i]].x;
@@ -486,7 +491,7 @@ void Model::getMaxIndices(Face &face, const Mesh &mesh) {
 
     // yMax
     int yMaxIndices = -1;
-    double yMax = -std::numeric_limits<double>().max();
+    double yMax = -std::numeric_limits<double>::max();
     for (int i = 0; i < 3; i++) {
         if (scene.mVertices[face.verticesIndices[i]].y > yMax) {
             yMax = scene.mVertices[face.verticesIndices[i]].y;
@@ -497,7 +502,7 @@ void Model::getMaxIndices(Face &face, const Mesh &mesh) {
 
     // zMax
     int zMaxIndices = -1;
-    double zMax = -std::numeric_limits<double>().max();
+    double zMax = -std::numeric_limits<double>::max();
     for (int i = 0; i < 3; i++) {
         if (scene.mVertices[face.verticesIndices[i]].z > zMax) {
             zMax = scene.mVertices[face.verticesIndices[i]].z;
@@ -565,4 +570,58 @@ void Model::computeFaceNormal(Face &face, const Mesh &mesh) {
     face.d = -(face.a * fv1.x + face.b * fv1.y + face.c * fv1.z);
 }
 
+bool Mesh::isIntersect(const Ray &ray) {
+    Vec3f rMax, rMin;
+
+    rMax = Vec3f((maxVertices.x - ray.o.x) / ray.d.x, (maxVertices.y - ray.o.y) / ray.d.y,
+                 (maxVertices.z - ray.o.z) / ray.d.z);
+
+    Vec3f temp = Vec3f((minVertices.x - ray.o.x) / ray.d.x, (minVertices.y - ray.o.y) / ray.d.y,
+                       (minVertices.z - ray.o.z) / ray.d.z);
+
+    if (temp.x > rMax.x) {
+        rMin.x = rMax.x;
+        rMax.x = temp.x;
+    } else
+        rMin.x = temp.x;
+
+    if (temp.y > rMax.y) {
+        rMin.y = rMax.y;
+        rMax.y = temp.y;
+    } else
+        rMin.y = temp.y;
+
+    if (temp.z > rMax.z) {
+        rMin.z = rMax.z;
+        rMax.z = temp.z;
+    } else
+        rMin.z = temp.z;
+
+    if (rMax.x <= 0 || rMax.y <= 0 || rMax.z <= 0)
+        return false;
+    if (rMax.x == INF || rMax.y == INF || rMax.z == INF)
+        return false;
+    rMin.x = std::max(rMin.x, 0.);
+    rMin.y = std::max(rMin.y, 0.);
+    rMin.z = std::max(rMin.z, 0.);
+
+    double range1[2];
+    double range2[2];
+    double range3[2];
+    range1[0] = rMin.x;
+    range1[1] = rMax.x;
+    range2[0] = rMin.y;
+    range2[1] = rMax.y;
+    range3[0] = rMin.z;
+    range3[1] = rMax.z;
+
+    double range12[2];
+    if (range1[1] >= range2[0] && range1[0] <= range2[1]) {
+        range12[0] = std::max(range1[0], range2[0]);
+        range12[1] = std::max(range1[0], range2[1]);
+        if (range12[1] >= range3[0] && range12[0] <= range3[1])
+            return true;
+    }
+    return false;
+}
 

@@ -25,25 +25,24 @@ struct Face {
     Vec3<int> normalsIndices;
     Vec2<int> textureCoordsIndices;
 
-//    int mVerticesIndices[3] = {-1, -1, -1};
-//    int mNormalsIndices[3] = {-1, -1, -1};
-//    int mTextureCoordsIndices[3] = {-1, -1, -1};
-
     // {xMax, yMax, zMax}
     Vec3<int> maxVerticesIndices;
     Vec3<int> minVerticesIndices;
-//    int maxVerticesIndices[3] = {-1, -1, -1};
-//    int minVerticesIndices[3] = {-1, -1, -1};
 
     std::string materialName;
 };
 
 struct Mesh {
+
     std::string name;
 
     int numFaces;
+    Vec3f maxVertices;
+    Vec3f minVertices;
 
     std::vector<Face> faces;
+
+    bool isIntersect(const Ray &ray);
 };
 
 struct Material {
@@ -59,12 +58,6 @@ struct Material {
     double Ns;
 };
 
-//struct Light {
-//    std::string groupname;
-//    Point3f center;
-//    double radius;
-//    double Le[3];
-//};
 
 struct Scene {
     int mNumMeshes;
@@ -79,7 +72,6 @@ struct Scene {
 
     std::vector<Mesh> mMeshes;
     std::vector<Material> mMaterials;
-//    std::vector<LightSource> mLights;
 
     std::vector<Point3f> mVertices;
     std::vector<Vector3f> mNormals;
