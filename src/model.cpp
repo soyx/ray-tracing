@@ -36,7 +36,7 @@ bool Model::load(std::string objPath, std::string mtlPath, std::string cfgPath) 
         return false;
 
     if (mtlPath.empty()) {
-        mtlPath = objPath.substr(0, objPath.find_first_of('.'));
+        mtlPath = objPath.substr(0, objPath.find_last_of('.'));
         mtlPath += ".mtl";
         std::cout << "use defualt material path:" << mtlPath << std::endl;
         if (!loadMtl(mtlPath)) {

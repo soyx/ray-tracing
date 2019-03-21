@@ -19,19 +19,34 @@ int main(int argc, char *argv[]) {
     int sampleNum = 10;
     int index = 1;
     std::string path;
-    if (argc >= 2) {
-        if(std::string(argv[index]) == "-o" && argc >= index + 2){
-            index++;
-            filename = std::string(argv[index++]);
+    for(int i = 0; i < argc; i++){
+        if(std::string(argv[i]) == "-o" && i + 1 <= argc){
+            i++;
+            filename = std::string(argv[i]);
+            continue;
         }
-        else if(std::string(argv[index]) == "-n" && argc >= index + 2){
-            index++;
-            sampleNum = atoi(argv[index++]);
+        if(std::string(argv[i]) == "-n" && i + 1 <= argc){
+            i++;
+            sampleNum = atoi(argv[i]);
+            continue;
         }
-        else{
-            path = std::string(argv[index++]);
-        }
+
+        path = std::string(argv[i]);
     }
+    // if (argc >= 2) {
+    //     if(std::string(argv[index]) == "-o" && argc >= index + 2){
+    //         index++;
+    //         filename = std::string(argv[index++]);
+    //     }
+    //     else if(std::string(argv[index]) == "-n" && argc >= index + 2){
+    //         index++;
+    //         sampleNum = atoi(argv[index++]);
+    //     }
+    //     else{
+    //         path = std::string(argv[index++]);
+    //         std::cout << "objpath:" << path << std::endl;
+    //     }
+    // }
     // Model model("../resources/Scene02/room.obj", "../resources/Scene02/room.mtl");
     Model model(path);
 //    Camera camera(Point3f(50, 60,160), Vector3f(0,1,0), Point3f(50 ,30, 0), 100);
