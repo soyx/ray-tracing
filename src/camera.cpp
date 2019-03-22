@@ -13,15 +13,15 @@ Camera::Camera(const Point3f position, const Point3f look, const Vector3f up, co
 
     double m = std::min(rasterHeight, rasterWidth);
 
-    raster2Screen = scale(2 / m, -2 / m, 1) * translate(Vector3f(-0.5 * rasterWidth, -0.5 * rasterHeight, 0));
+    raster2Screen = scale(2 / m, -2 / m, -1) * translate(Vector3f(-0.5 * rasterWidth, -0.5 * rasterHeight, 0));
 
     double alpha = (focalLength * std::tan(fovy * 0.5));
     screen2Camera = scale(alpha, alpha, focalLength);
 
     Vector3f cx, cy, cz;
     cy = up.normalize();
-    cz = (look - position).normalize();
-    cx = cross(cz, cy);
+    cz = (look - position).normalize()*-1;
+    cx = cross(cy, cz);
 
     camera2World = Transform(Mat4(cx.x, cy.x, cz.x, 0,
                                   cx.y, cy.y, cz.y, 0,
