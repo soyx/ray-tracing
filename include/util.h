@@ -120,12 +120,12 @@ public:
 };
 
 template<typename T>
-Vec2<T> mul(Vec2<T> v1, Vec2<T> v2) {
+Vec2<T> mul(const Vec2<T>& v1, const Vec2<T>& v2) {
     return Vec2<T>(v1.x * v2.x, v1.y * v2.y);
 }
 
 template<typename T>
-Vec3<T> mul(Vec3<T> v1, Vec3<T> v2) {
+Vec3<T> mul(const Vec3<T>& v1, const Vec3<T>& v2) {
     return Vec3<T>(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
 }
 

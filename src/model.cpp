@@ -325,18 +325,21 @@ bool Model::loadMtl(std::string mtlPath) {
         }
 
 
-        if (lineBuf[0] == 'K' && lineBuf[1] == 'a')
-            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%lf%lf%lf", material.Ka, material.Ka + 1,
-                   material.Ka + 2);
+        // if (lineBuf[0] == 'K' && lineBuf[1] == 'a')
+        //     sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%lf%lf%lf", material.Ka, material.Ka + 1,
+        //            material.Ka + 2);
 
         if (lineBuf[0] == 'K' && lineBuf[1] == 's') {
             double a, b, c;
             sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%lf%lf%lf", &a, &b, &c);
             material.KSpecular = Vec3f(a, b, c);
         }
-        if (lineBuf[0] == 'T' && lineBuf[1] == 'f')
-            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%lf%lf%lf", material.Tf, material.Tf + 1,
-                   material.Tf + 2);
+        if (lineBuf[0] == 'T' && lineBuf[1] == 'f'){
+            double a, b, c;
+            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%lf%lf%lf", &a, &b, &c);
+            material.Tf = Vec3f(a, b, c);
+        }
+            
 
         if (lineBuf[0] == 'N' && lineBuf[1] == 's') {
             sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%lf", &material.Ns);

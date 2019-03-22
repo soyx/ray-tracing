@@ -50,9 +50,9 @@ struct Material {
 
     int illum;
 
-    double Kd[3], Ka[3], Tf[3], Ks[3];
     Vec3f KDiffuse;
     Vec3f KSpecular;
+    Vec3f Tf;
 
     double Ni;
     double Ns;
