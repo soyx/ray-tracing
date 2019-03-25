@@ -1,6 +1,6 @@
 #include "light/sphereLightSource.h"
 
-double SphereLightSource::intersect(const Ray &ray) const {
+ __host__ __device__ double SphereLightSource::intersect(const Ray &ray) const {
     Vector3f op = position - ray.o;
     double a = dot(ray.d, ray.d);
     double b = -2 * dot(ray.d, op);

@@ -5,37 +5,39 @@
 #include <cstdlib>
 #include <cmath>
 
+#include <cuda_runtime.h>
+
 #include "util.h"
 #include "model.h"
 #include "camera.h"
 
 #define RANDNUM std::rand() / (double)(RAND_MAX)
 
-struct Color {
-    Color(double r = 0, double g = 0, double b = 0) : r(r), g(g), b(b) {}
-
-    double r, g, b;
-};
-
 class Render {
 public:
-//    Render();
+    __host__ __device__ Render(Model &model, Camera &camera, int sampleNum = 50);
+    __host__ __device__ Render(Model &model, Camera &camera, int argc, char *argv[], int sampleNum = 50, bool useGPU = true);
 
-    Render(Model &model, Camera &camera, int sampleNum = 50);
-
-    void run();
+    __host__ __device__ void run();
 
 private:
 
-    double intersect(const Face &face, const Ray &ray);
+    __host__ __device__ double intersect(const Face &face, const Ray &ray);
 
-    Vec3f radiance(const Ray &ray, int depth);
+    __host__ __device__ Vec3f radiance(const Ray &ray, int depth);
+
+    __device__ void runGPU(int sampleNum);
 
     Model &renderModel;
 
     Camera &camera;
 
     int sampleNum;
+
+    bool useGPU;
+
+    Camera *d_camera;
+    Model *d_model;
 };
 
 

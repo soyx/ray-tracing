@@ -6,11 +6,11 @@
 class Shape {
 public:
 
-    Shape() {}
+    __host__ __device__ Shape() {}
 
-    Shape(Vec3f emission, Vec3f kd, Vec3f ks) : emission(emission), KDiffuse(kd), KSpecular(ks) {}
+    __host__ __device__ Shape(Vec3f emission, Vec3f kd, Vec3f ks) : emission(emission), KDiffuse(kd), KSpecular(ks) {}
 
-    virtual double intersect(const Ray &ray) const = 0;
+    __host__ __device__ virtual double intersect(const Ray &ray) const = 0;
 
     Vec3f emission;
     Vec3f KDiffuse;

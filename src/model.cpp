@@ -3,9 +3,9 @@
 
 #include "model.h"
 
-Model::Model() {}
+__host__ __device__ Model::Model() {}
 
-Model::Model(std::string objPath, std::string mtlPath) {
+__host__ __device__ Model::Model(std::string objPath, std::string mtlPath) {
     load(objPath, mtlPath);
 }
 

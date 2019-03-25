@@ -1,6 +1,6 @@
 #include "matrix.h"
 
-Mat4::Mat4()
+ __host__ __device__ Mat4::Mat4()
 {
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
@@ -10,12 +10,12 @@ Mat4::Mat4()
                 m[i][j] = 0.0f;
 }
 
-Mat4::Mat4(const double mat[4][4])
+ __host__ __device__ Mat4::Mat4(const double mat[4][4])
 {
     std::memcpy(m, mat, 16 * sizeof(double));
 }
 
-Mat4::Mat4(double m00, double m01, double m02, double m03,
+ __host__ __device__ Mat4::Mat4(double m00, double m01, double m02, double m03,
            double m10, double m11, double m12, double m13,
            double m20, double m21, double m22, double m23,
            double m30, double m31, double m32, double m33)
@@ -38,13 +38,13 @@ Mat4::Mat4(double m00, double m01, double m02, double m03,
     m[3][3] = m33;
 }
 
-Mat4 Mat4::operator=(const Mat4 &m2)
+ __host__ __device__ Mat4 Mat4::operator=(const Mat4 &m2)
 {
     std::memcpy(m, m2.m, 16 * sizeof(double));
     return *this;
 }
 
-Mat4 Mat4::operator+(const Mat4 &m2) const
+ __host__ __device__ Mat4 Mat4::operator+(const Mat4 &m2) const
 {
     double mtemp[4][4];
     for (int i = 0; i < 4; i++)
@@ -55,7 +55,7 @@ Mat4 Mat4::operator+(const Mat4 &m2) const
     return Mat4(mtemp);
 }
 
-Mat4 Mat4::operator-(const Mat4 &m2) const
+ __host__ __device__ Mat4 Mat4::operator-(const Mat4 &m2) const
 {
     double mtemp[4][4];
     for (int i = 0; i < 4; i++)
@@ -66,7 +66,7 @@ Mat4 Mat4::operator-(const Mat4 &m2) const
     return Mat4(mtemp);
 }
 
-Mat4 Mat4::operator*(const Mat4 &m2) const
+ __host__ __device__ Mat4 Mat4::operator*(const Mat4 &m2) const
 {
     Mat4 ans;
     for (int i = 0; i < 4; i++)
@@ -76,7 +76,7 @@ Mat4 Mat4::operator*(const Mat4 &m2) const
     return ans;
 }
 
-bool Mat4::operator==(const Mat4 &m2) const
+ __host__ __device__ bool Mat4::operator==(const Mat4 &m2) const
 {
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
@@ -86,7 +86,7 @@ bool Mat4::operator==(const Mat4 &m2) const
     return true;
 }
 
-bool Mat4::operator!=(const Mat4 &m2) const
+ __host__ __device__ bool Mat4::operator!=(const Mat4 &m2) const
 {
     for (int i = 0; i < 4; i++)
         for (int j = 0; j < 4; j++)
@@ -96,7 +96,7 @@ bool Mat4::operator!=(const Mat4 &m2) const
     return false;
 }
 
-Mat4 Mat4::inverse()const
+ __host__ __device__ Mat4 Mat4::inverse()const
 {
     int indxc[4], indxr[4];
     int ipiv[4] = {0, 0, 0, 0};
@@ -169,7 +169,7 @@ Mat4 Mat4::inverse()const
     return Mat4(minv);
 }
 
-Mat4 Mat4::transpose() const
+ __host__ __device__ Mat4 Mat4::transpose() const
 {
     return Mat4(m[0][0], m[1][0], m[2][0], m[3][0],
                 m[0][1], m[1][1], m[2][1], m[3][1],

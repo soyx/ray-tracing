@@ -3,36 +3,63 @@
 Render::Render(Model &model, Camera &camera, int sampleNum)
     : camera(camera), renderModel(model) {
     this->sampleNum = sampleNum;
-    srand((unsigned)time(NULL));
+}
+Render::Render(Model &model, Camera & camera, int argc, char* argv[], int sampleNum, bool useGPU)
+:camera(camera), renderModel(model){
+    this->sampleNum = sampleNum;
+    if(useGPU){
+        std::cout << "Starting gpu..." << std::endl;
+        printf("Starting gpu...\n");
+        int devID = findCudaDevice(argc, (const char **)argv);
+        cudaDeviceProp deviceProps;
+        checkCudaErrors(cudaGetDeviceProperties(&deviceProps, devID));
+        printf("CUDA device [%s]\n", deviceProps.name);
+
+        checkCudaErrors(cudaMalloc((void**)&d_model, sizeof(model)));
+        checkCudaErrors(cudaMalloc((void**)&d_camera, sizeof(camera)));
+
+        checkCudaErrors(cudaMemcpy(d_model, &model, sizeof(model), cudaMemcpyHostToDevice));
+        checkCudaErrors(cudaMemcpy(d_camera, &camera, sizeof(camera), cudaMemcpyHostToDevice));
+
+    }
 }
 
+__global__
 void Render::run() {
-    int total = camera.filmSize.x * camera.filmSize.y;
-    for (unsigned int y = 0; y < camera.filmSize.y; y++) {
-        for (unsigned int x = 0; x < camera.filmSize.x; x++) {
-            fprintf(stderr, "\r%5.4f%%",
-                    100. * (y * camera.filmSize.x + x) / total);
+    int total = d_camera->filmSize.x * d_camera->filmSize.y;
+    dim3 blocks(4,4,1);
+    dim3 threads(32,32,1);
+    runGPU<<<blocks, threads>>>();
+}
 
+__device__
+void Render::runGPU(int sampleNum){
+    unsigned int blockId = blockIdx.y * gridDim.x + blockIdx.x;
+    unsigned int threadId = blockId * blockDim.x * blockDim.y + threadIdx.y * blockDim.x + threadIdx.x;
+    unsigned int threadDimx = d_camera->filmSize.x / (gridDim.x * blockDim.x);
+    unsigned int threadDimy = d_camera->filmSize.y / (gridDim.y * blockDim.y);
+
+    for(unsigned int y = threadIdx.y * threadDimy; y < threadIdx.y + threadDimy && y < d_camera->filmSize.y; y++ )
+    {
+        for(unsigned int x = threadIdx.x * threadDimx; x < threadIdx.x + threadDimx && x < d_camera->filmSize.x; x++)
+        {
             Vec3f c;
-            for (int i = 0; i < sampleNum; i++) {
+            for(int i = 0; i < sampleNum; i++){
                 // filter
                 double r1 = 2 * (RANDNUM);
                 double r2 = 2 * (RANDNUM);
-                double dx = r1 < 1 ? std::sqrt(r1) - 1 : 1 - std::sqrt(2 - r1);
-                double dy = r2 < 1 ? std::sqrt(r2) - 1 : 1 - std::sqrt(2 - r2);
+                double dx = r1 < 1 ? sqrt(r1) - 1 : 1 - sqrt(2 - r1);
+                double dy = r2 < 1 ? sqrt(r2) - 1 : 1 - sqrt(2 - r2);
 
-                Vector3f d = camera.camera2World(
-                    camera.raster2Camera(
-                        Point3f(x + (dx + .5) * .5, y + (dy + .5) * .5, 1.)) -
-                    Point3f(0, 0, 0));
-                c = c + radiance(Ray(camera.position, d.normalize()), 0) *
-                            (1. / sampleNum);
-            }
-            camera.film[y * camera.filmSize.x + x] = c;
+                Vector3f d = d_camera->camera2World(d_camera->raster2Camera(Point3f(x+(dx+.5)*.5, y+(dy+.5)*.5,1.)) - Point3f(0,0,0));
+                c = c + radiance(Ray(d_camera->position, d.normalize()),0) * (1./sampleNum);
+            } 
+            d_camera->film[y * camera.filmSize.x + x] = c;
         }
     }
 }
 
+__host__ __device__
 double Render::intersect(const Face &face, const Ray &ray) {
     // intersection with mesh
     Vec3f rMax, rMin;
@@ -131,6 +158,7 @@ double Render::intersect(const Face &face, const Ray &ray) {
     return 0;
 }
 
+__host__ __device__
 Vec3f Render::radiance(const Ray &ray, int depth) {
     double t = std::numeric_limits<double>::infinity();
     Face face;

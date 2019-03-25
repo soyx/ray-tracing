@@ -5,13 +5,13 @@
 
 class LightSource {
 public:
-    LightSource()= default;
+    __host__ __device__ LightSource()= default;
 
-    LightSource(Vec3f emission, Vec3f kd, Vec3f ks) : emission(emission), KDiffuse(kd), KSpecular(ks) {}
+    __host__ __device__ LightSource(Vec3f emission, Vec3f kd, Vec3f ks) : emission(emission), KDiffuse(kd), KSpecular(ks) {}
 
-    virtual ~LightSource() = default;
+    __host__ __device__ virtual ~LightSource() = default;
 
-    virtual double intersect(const Ray &ray) const = 0;
+    __host__ __device__ virtual double intersect(const Ray &ray) const = 0;
 
 public:
     Vec3f emission;
