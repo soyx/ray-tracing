@@ -21,12 +21,10 @@ double QuadLightSource::intersect(const Ray &ray) const {
         if (std::abs(v.y) <= size.x && std::abs(v.z) <= size.y) return t;
     } else if (normal.y != 0) {
         if (std::abs(v.z) <= size.x && std::abs(v.x) <= size.y)
-            ;
-        return t;
+            return t;
     } else if (normal.z != 0) {
         if (std::abs(v.x) <= size.x && std::abs(v.y) <= size.y)
-            ;
-        return t;
+            return t;
     }
     return 0;
 }
