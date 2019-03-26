@@ -10,10 +10,16 @@ Ks 0.00 0.00 0.00
 newmtl black
 Kd 0.00 0.00 0.00
 Ks 0.00 0.00 0.00
+newmtl cblue
+Kd 0.00 0.8 0.8
+Ks 0.00 0.00 0.00
+newmtl green
+Kd 0.00 0.98 0.00
+Ks 0.00 0.00 0.00
 newmtl mirror
 Kd 0.00 0.00 0.00
 Ks 0.98 0.98 0.98
 newmtl glass
-Kd 0.30 0.30 0.00
-Tf 0.00 0.00 0.00
+Kd 0.1 0.1 0.1
+Tf 0.10 0.10 0.10
 Ni 1.5

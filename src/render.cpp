@@ -8,13 +8,15 @@ Render::Render(Model &model, Camera &camera, int sampleNum)
 
 void Render::run() {
     int total = camera.filmSize.x * camera.filmSize.y;
-    Vec3f c;
-    #pragma omp parallel for schedule(dynamic, 1) private(c)
+    
     for (unsigned int y = 0; y < camera.filmSize.y; y++) {
+        
+        #pragma omp parallel for schedule(dynamic, 1)
         for (unsigned int x = 0; x < camera.filmSize.x; x++) {
             fprintf(stderr, "\r%5.4f%%",
                     100. * (y * camera.filmSize.x + x) / total);
-
+            Vec3f c;
+            // #pragma omp parallel for schedule(dynamic, 1)
             for (int i = 0; i < sampleNum; i++) {
                 // filter
                 double r1 = 2 * (RANDNUM);
@@ -240,7 +242,7 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
                 double sinThresh = 1 / n12;
                 if (sinTheta1 > sinThresh) {
                     // all reflect
-                    return face.emission +
+                    xyzColor = xyzColor + face.emission +
                            mul(kdegradation, radiance(reflRay, depth + 1));
                 } else {
                     // light plane
@@ -265,7 +267,7 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
                     Vec3f kr = mul(Vec3f(R, R, R), kdegradation);
                     double T = 1 - R;
                     Vec3f kt = mul(Vec3f(T, T, T), kdegradation);
-                    xyzColor = xyzColor +face.emission + mul(kr, radiance(reflRay, depth + 1)) +
+                    xyzColor = xyzColor + face.emission + mul(kr, radiance(reflRay, depth + 1)) +
                            mul(kt, radiance(Ray(p, tdir), depth + 1));
                 }
             }

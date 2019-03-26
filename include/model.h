@@ -55,7 +55,7 @@ struct Material {
     Vec3f KSpecular;
     Vec3f Tf = Vec3f(1,1,1);
 
-    double Ni;
+    double Ni = 1.0;
     double Ns;
 };
 
