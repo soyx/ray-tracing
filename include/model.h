@@ -52,7 +52,7 @@ struct Material {
 
     Vec3f KDiffuse;
     Vec3f KSpecular;
-    Vec3f Tf;
+    Vec3f Tf = Vec3f(1,1,1);
 
     double Ni;
     double Ns;

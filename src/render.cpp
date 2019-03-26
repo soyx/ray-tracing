@@ -189,6 +189,7 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
         Vector3f nl;
 
         if (dot(n, ray.d) > 0) nl = n * -1;
+        else nl = n;
 
         if (material.KDiffuse.maxCor > 1e-10) {
             double r1 = 2 * M_PI * (RANDNUM);
@@ -209,14 +210,14 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
                              .normalize();
 
             xyzColor =
-                xyzColor + mul(material.KDiffuse, radiance(Ray(p, d), ++depth)) * dot(ray.d, n);
+                xyzColor + mul(material.KDiffuse, radiance(Ray(p, d), depth + 1)) * dot(d, nl);
         }
 
         if (material.KSpecular.maxCor > 1e-10) {
             xyzColor =
                 xyzColor +
                 mul(material.KSpecular,
-                    radiance(Ray(p, ray.d - nl * 2 * dot(nl, ray.d)), ++depth));
+                    radiance(Ray(p, ray.d - nl * 2 * dot(nl, ray.d)), depth + 1));
         }
 
         if (material.Tf.maxCor <= 1 - 1e-10) {
@@ -241,13 +242,13 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
                            mul(kdegradation, radiance(reflRay, depth + 1));
                 } else {
                     // light plane
-                    Vector3f nt = cross(n, cross(ray.d, n)).normalize();
+                    Vector3f nt = cross(nl, cross(ray.d, nl)).normalize();
                     if (dot(ray.d, nt) < 0) nt = nt * -1;
                     double sin2Theta2 = (1 - cos2Theta1) * n12 * n12;
                     double cos2Theta2 = 1 - sin2Theta2;
 
                     Vector3f tdir =
-                        n * -std::sqrt(cos2Theta2) + nt * std::sqrt(sin2Theta2);
+                        nl * -std::sqrt(cos2Theta2) + nt * std::sqrt(sin2Theta2);
 
                     double a = n12 * std::sqrt(1 - (n12 * sinTheta1) *
                                                        (n12 * sinTheta1));
@@ -269,13 +270,13 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
             // outside -> inside
             else {
                 double n12 = 1 / material.Ni;
-                Vector3f nt = cross(n, cross(ray.d, n)).normalize();
+                Vector3f nt = cross(nl, cross(ray.d, nl)).normalize();
                 if (dot(ray.d, nt) < 0) nt = nt * -1;
                 double sin2Theta2 = (1 - cos2Theta1) * n12 * n12;
                 double cos2Theta2 = 1 - sin2Theta2;
 
                 Vector3f tdir =
-                    n * -std::sqrt(cos2Theta2) + nt * std::sqrt(sin2Theta2);
+                    nl * -std::sqrt(cos2Theta2) + nt * std::sqrt(sin2Theta2);
 
                 double a =
                     n12 * std::sqrt(1 - (n12 * sinTheta1) * (n12 * sinTheta1));
