@@ -135,7 +135,7 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
     double t = std::numeric_limits<double>::infinity();
     Face face;
     int id = -1;
-    enum InterType { OTHER, FACE, LIGHTSOURCE };
+    enum InterType { OTHER, FACE, SPHERE_LIGHTSOURCE,QUAD_LIGHTSOURCE };
 
     InterType interType = OTHER;
 
@@ -156,12 +156,12 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
 
     // self defined shapes such as light
     // todo
-    for (unsigned int i = 0; i < renderModel.config.sphereLights.size(); i++) {
-        double tt = renderModel.config.sphereLights[i].intersect(ray);
+    for (unsigned int i = 0; i < renderModel.scene.sphereLights.size(); i++) {
+        double tt = renderModel.scene.sphereLights[i].intersect(ray);
         if (tt > 1e-10 && tt < t) {
             t = tt;
             id = i;
-            interType = LIGHTSOURCE;
+            interType = SPHERE_LIGHTSOURCE;
         }
     }
 
@@ -298,8 +298,8 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
         }
     }
     // other shapes
-    else if (interType == LIGHTSOURCE) {
-        SphereLightSource light = renderModel.config.sphereLights[id];
+    else if (interType == SPHERE_LIGHTSOURCE) {
+        SphereLightSource light = renderModel.scene.sphereLights[id];
         xyzColor = xyzColor + light.emission;
         if (depth > 5) {
             if (depth > 10) return xyzColor;

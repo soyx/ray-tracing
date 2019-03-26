@@ -19,7 +19,6 @@ struct Color {
 
 class Render {
 public:
-//    Render();
 
     Render(Model &model, Camera &camera, int sampleNum = 50);
 

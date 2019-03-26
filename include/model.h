@@ -9,6 +9,7 @@
 #include <sstream>
 #include <map>
 #include "light/sphereLightSource.h"
+#include "light/quadLightSource.h"
 
 // Model->Scene->Mesh->Face
 
@@ -68,6 +69,9 @@ struct Scene {
     int mNumNormals;
     int mNumTextureCoords;
 
+    std::vector<SphereLightSource> sphereLights;
+    std::vector<QuadLightSource> quadLights;
+
     std::map<std::string, int> mtlName2ID;
 
     std::vector<Mesh> mMeshes;
@@ -90,8 +94,6 @@ struct Config{
         Vector3f up;
         double fovy;
     }cameraparams;
-
-    std::vector<SphereLightSource> sphereLights;
 };
 
 class Model {

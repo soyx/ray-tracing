@@ -9,7 +9,8 @@ Model::Model(std::string objPath, std::string mtlPath) {
     load(objPath, mtlPath);
 }
 
-bool Model::load(std::string objPath, std::string mtlPath, std::string cfgPath) {
+bool Model::load(std::string objPath, std::string mtlPath,
+                 std::string cfgPath) {
     scene.mMaterials.clear();
     scene.mMeshes.clear();
     scene.mNumLights = 0;
@@ -76,25 +77,21 @@ bool Model::loadObj(std::string objPath) {
             if (lineBuf[lineBuf.size() - 1] == '\r')
                 lineBuf.erase(lineBuf.end() - 1);
 
-        if (lineBuf.empty())
-            continue;
+        if (lineBuf.empty()) continue;
 
         // remove space and tab at begin
         while (lineBuf[0] == ' ' || lineBuf[0] == '\t') {
             lineBuf.erase(lineBuf.begin());
-            if (lineBuf.empty())
-                break;
+            if (lineBuf.empty()) break;
         }
-        if (lineBuf.empty())
-            continue;
+        if (lineBuf.empty()) continue;
         // remove  space and tab at end
-        while (lineBuf[lineBuf.size() - 1] == ' ' || lineBuf[lineBuf.size() - 1] == ' ') {
+        while (lineBuf[lineBuf.size() - 1] == ' ' ||
+               lineBuf[lineBuf.size() - 1] == ' ') {
             lineBuf.erase(lineBuf.begin());
-            if (lineBuf.empty())
-                break;
+            if (lineBuf.empty()) break;
         }
-        if (lineBuf.empty())
-            continue;
+        if (lineBuf.empty()) continue;
 
         // group
         if (lineBuf[0] == 'g') {
@@ -102,8 +99,7 @@ bool Model::loadObj(std::string objPath) {
             if (lineBuf == "g default") {
                 mesh.numFaces = mesh.faces.size();
 
-                if (mesh.numFaces > 0)
-                    scene.mMeshes.push_back(mesh);
+                if (mesh.numFaces > 0) scene.mMeshes.push_back(mesh);
 
                 mesh.maxVertices = Vec3f(-INF, -INF, -INF);
                 mesh.minVertices = Vec3f(INF, INF, INF);
@@ -117,8 +113,7 @@ bool Model::loadObj(std::string objPath) {
         }
 
         // comment
-        if (lineBuf[0] == '#')
-            continue;
+        if (lineBuf[0] == '#') continue;
 
         // vertex
         if (lineBuf[0] == 'v' && lineBuf[1] == ' ') {
@@ -128,18 +123,12 @@ bool Model::loadObj(std::string objPath) {
             ss >> vx >> vy >> vz;
             scene.mVertices.push_back(Point3f(vx, vy, vz));
 
-            if (vx > mesh.maxVertices.x)
-                mesh.maxVertices.x = vx;
-            if (vy > mesh.maxVertices.y)
-                mesh.maxVertices.y = vy;
-            if (vz > mesh.maxVertices.z)
-                mesh.maxVertices.z = vz;
-            if (vx < mesh.minVertices.x)
-                mesh.minVertices.x = vx;
-            if (vy < mesh.minVertices.y)
-                mesh.minVertices.y = vy;
-            if (vz < mesh.minVertices.z)
-                mesh.minVertices.z = vz;
+            if (vx > mesh.maxVertices.x) mesh.maxVertices.x = vx;
+            if (vy > mesh.maxVertices.y) mesh.maxVertices.y = vy;
+            if (vz > mesh.maxVertices.z) mesh.maxVertices.z = vz;
+            if (vx < mesh.minVertices.x) mesh.minVertices.x = vx;
+            if (vy < mesh.minVertices.y) mesh.minVertices.y = vy;
+            if (vz < mesh.minVertices.z) mesh.minVertices.z = vz;
         }
 
         // normal
@@ -171,12 +160,10 @@ bool Model::loadObj(std::string objPath) {
 
             int spaceCnt = 0;
             for (auto c : data) {
-                if (c == ' ')
-                    spaceCnt++;
+                if (c == ' ') spaceCnt++;
             }
 
-            if (spaceCnt < 2)
-                return false;
+            if (spaceCnt < 2) return false;
 
             std::vector<std::string> vertexData;
 
@@ -185,22 +172,28 @@ bool Model::loadObj(std::string objPath) {
 
                 data.erase(0, vertexData[vertexData.size() - 1].size());
 
-                if (!data.empty())
-                    data.erase(0, 1);
+                if (!data.empty()) data.erase(0, 1);
             }
 
             Face face;
 
             for (int i = 0; i < 3; i++) {
                 // a//c
-                if (vertexData[i].find_last_of('/') - vertexData[i].find_first_of('/') == 1) {
-                    sscanf(vertexData[i].c_str(), "%d//%d", &face.verticesIndices[i], &face.normalsIndices[i]);
+                if (vertexData[i].find_last_of('/') -
+                        vertexData[i].find_first_of('/') ==
+                    1) {
+                    sscanf(vertexData[i].c_str(), "%d//%d",
+                           &face.verticesIndices[i], &face.normalsIndices[i]);
                     face.verticesIndices[i]--;
                     face.normalsIndices[i]--;
                 }
                 // a/b/c
-                if (vertexData[i].find_last_of('/') - vertexData[i].find_first_of('/') > 1) {
-                    sscanf(vertexData[i].c_str(), "%d/%d/%d", &face.verticesIndices[i], &face.textureCoordsIndices[i],
+                if (vertexData[i].find_last_of('/') -
+                        vertexData[i].find_first_of('/') >
+                    1) {
+                    sscanf(vertexData[i].c_str(), "%d/%d/%d",
+                           &face.verticesIndices[i],
+                           &face.textureCoordsIndices[i],
                            &face.normalsIndices[i]);
                     face.verticesIndices[i]--;
                     face.textureCoordsIndices[i]--;
@@ -220,16 +213,23 @@ bool Model::loadObj(std::string objPath) {
                 face.verticesIndices[1] = face.verticesIndices[2];
                 face.normalsIndices[1] = face.normalsIndices[2];
                 // a//c
-                if (vertexData[i].find_last_of('/') - vertexData[i].find_first_of('/') == 1) {
-                    sscanf(vertexData[i].c_str(), "%d//%d", &face.verticesIndices[2], &face.normalsIndices[2]);
+                if (vertexData[i].find_last_of('/') -
+                        vertexData[i].find_first_of('/') ==
+                    1) {
+                    sscanf(vertexData[i].c_str(), "%d//%d",
+                           &face.verticesIndices[2], &face.normalsIndices[2]);
 
                     face.verticesIndices[2]--;
                     face.normalsIndices[2]--;
                 }
                 // a/b/c
-                if (vertexData[i].find_last_of('/') - vertexData[i].find_first_of('/') > 1) {
+                if (vertexData[i].find_last_of('/') -
+                        vertexData[i].find_first_of('/') >
+                    1) {
                     face.textureCoordsIndices[1] = face.textureCoordsIndices[2];
-                    sscanf(vertexData[i].c_str(), "%d/%d/%d", &face.verticesIndices[2], &face.textureCoordsIndices[2],
+                    sscanf(vertexData[i].c_str(), "%d/%d/%d",
+                           &face.verticesIndices[2],
+                           &face.textureCoordsIndices[2],
                            &face.normalsIndices[2]);
                     face.verticesIndices[2]--;
                     face.textureCoordsIndices[2]--;
@@ -247,14 +247,12 @@ bool Model::loadObj(std::string objPath) {
     }
     // last
     mesh.numFaces = mesh.faces.size();
-    if (mesh.numFaces > 0)
-        scene.mMeshes.push_back(mesh);
+    if (mesh.numFaces > 0) scene.mMeshes.push_back(mesh);
 
     return true;
 }
 
 bool Model::loadMtl(std::string mtlPath) {
-
     std::ifstream ifs(mtlPath);
     if (!ifs) {
         std::cout << "ERROR: CANNOT OPEN " << mtlPath << std::endl;
@@ -274,29 +272,24 @@ bool Model::loadMtl(std::string mtlPath) {
             if (lineBuf[lineBuf.size() - 1] == '\r')
                 lineBuf.erase(lineBuf.end() - 1);
 
-        if (lineBuf.empty())
-            continue;
+        if (lineBuf.empty()) continue;
 
         // remove space and tab at begin
         while (lineBuf[0] == ' ' || lineBuf[0] == '\t') {
             lineBuf.erase(lineBuf.begin());
-            if (lineBuf.empty())
-                break;
+            if (lineBuf.empty()) break;
         }
-        if (lineBuf.empty())
-            continue;
+        if (lineBuf.empty()) continue;
         // remove  space and tab at end
-        while (lineBuf[lineBuf.size() - 1] == ' ' || lineBuf[lineBuf.size() - 1] == ' ') {
+        while (lineBuf[lineBuf.size() - 1] == ' ' ||
+               lineBuf[lineBuf.size() - 1] == ' ') {
             lineBuf.erase(lineBuf.begin());
-            if (lineBuf.empty())
-                break;
+            if (lineBuf.empty()) break;
         }
-        if (lineBuf.empty())
-            continue;
+        if (lineBuf.empty()) continue;
 
         // comment
-        if (lineBuf[0] == '#')
-            continue;
+        if (lineBuf[0] == '#') continue;
 
         // new material
         if (lineBuf.substr(0, 6) == "newmtl") {
@@ -304,7 +297,7 @@ bool Model::loadMtl(std::string mtlPath) {
                 scene.mMaterials.push_back(material);
                 // map
                 unsigned long s = scene.mtlName2ID.size();
-                scene.mtlName2ID[material.name] = (int) s;
+                scene.mtlName2ID[material.name] = (int)s;
             }
             material.name = lineBuf.substr(7, lineBuf.size() - 1);
             material.illum = 0;
@@ -320,38 +313,42 @@ bool Model::loadMtl(std::string mtlPath) {
 
         if (lineBuf[0] == 'K' && lineBuf[1] == 'd') {
             double a, b, c;
-            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%lf%lf%lf", &a, &b, &c);
+            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%lf%lf%lf",
+                   &a, &b, &c);
             material.KDiffuse = Vec3f(a, b, c);
         }
 
-
         // if (lineBuf[0] == 'K' && lineBuf[1] == 'a')
-        //     sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%lf%lf%lf", material.Ka, material.Ka + 1,
+        //     sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(),
+        //     "%lf%lf%lf", material.Ka, material.Ka + 1,
         //            material.Ka + 2);
 
         if (lineBuf[0] == 'K' && lineBuf[1] == 's') {
             double a, b, c;
-            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%lf%lf%lf", &a, &b, &c);
+            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%lf%lf%lf",
+                   &a, &b, &c);
             material.KSpecular = Vec3f(a, b, c);
         }
-        if (lineBuf[0] == 'T' && lineBuf[1] == 'f'){
+        if (lineBuf[0] == 'T' && lineBuf[1] == 'f') {
             double a, b, c;
-            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%lf%lf%lf", &a, &b, &c);
+            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%lf%lf%lf",
+                   &a, &b, &c);
             material.Tf = Vec3f(a, b, c);
         }
-            
 
         if (lineBuf[0] == 'N' && lineBuf[1] == 's') {
-            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%lf", &material.Ns);
+            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%lf",
+                   &material.Ns);
         }
 
         if (lineBuf[0] == 'N' && lineBuf[1] == 'i') {
-            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%lf", &material.Ni);
+            sscanf(lineBuf.substr(3, lineBuf.size() - 1).c_str(), "%lf",
+                   &material.Ni);
         }
     }
     scene.mMaterials.push_back(material);
     unsigned long s = scene.mtlName2ID.size();
-    scene.mtlName2ID[material.name] = (int) s;
+    scene.mtlName2ID[material.name] = (int)s;
 
     return true;
 }
@@ -364,12 +361,12 @@ bool Model::loadCfg(std::string cfgPath) {
     }
 
     std::string lineBuf;
-    bool cameraParamsFlag = false;
-    bool lightFlag = false;
+    enum DataType { OTHER, CAMERA_PARAMS, SPHERE_LIGHT, QUAD_LIGHT };
 
-    Point3f p;
-    double radius;
-    Vec3f emission;
+    DataType type = OTHER;
+
+    SphereLightSource spherelight;
+    QuadLightSource quadLight;
 
     while (getline(ifs, lineBuf)) {
         std::cout << "Read from file: " << lineBuf << std::endl;
@@ -382,54 +379,54 @@ bool Model::loadCfg(std::string cfgPath) {
             if (lineBuf[lineBuf.size() - 1] == '\r')
                 lineBuf.erase(lineBuf.end() - 1);
 
-        if (lineBuf.empty())
-            continue;
+        if (lineBuf.empty()) continue;
 
         // remove space and tab at begin
         while (lineBuf[0] == ' ' || lineBuf[0] == '\t') {
             lineBuf.erase(lineBuf.begin());
-            if (lineBuf.empty())
-                break;
+            if (lineBuf.empty()) break;
         }
-        if (lineBuf.empty())
-            continue;
+        if (lineBuf.empty()) continue;
         // remove  space and tab at end
-        while (lineBuf[lineBuf.size() - 1] == ' ' || lineBuf[lineBuf.size() - 1] == ' ') {
+        while (lineBuf[lineBuf.size() - 1] == ' ' ||
+               lineBuf[lineBuf.size() - 1] == ' ') {
             lineBuf.erase(lineBuf.begin());
-            if (lineBuf.empty())
-                break;
+            if (lineBuf.empty()) break;
         }
-        if (lineBuf.empty())
-            continue;
+        if (lineBuf.empty()) continue;
 
         // comment
-        if (lineBuf[0] == '#')
-            continue;
+        if (lineBuf[0] == '#') continue;
 
         if (lineBuf.substr(0, lineBuf.find_first_of(' ')) == "resolution")
-            sscanf(lineBuf.substr(lineBuf.find_first_of(' ') + 1, lineBuf.size()).c_str(),
-                   "%d*%d", &config.resolution.width, &config.resolution.height);
+            sscanf(
+                lineBuf.substr(lineBuf.find_first_of(' ') + 1, lineBuf.size())
+                    .c_str(),
+                "%d*%d", &config.resolution.width, &config.resolution.height);
 
         else if (lineBuf == "cameraparams") {
-            if (lightFlag) {
-                config.sphereLights.push_back(SphereLightSource(radius, p, emission));
+            if (type == SPHERE_LIGHT) {
+                this->scene.sphereLights.push_back(spherelight);
+                spherelight.clear();
             }
-            cameraParamsFlag = true;
-            lightFlag = false;
-            radius = 0;
-            p = Point3f();
-            emission = Vec3f();
-        } else if (lineBuf == "light") {
-            if (lightFlag)
-                config.sphereLights.push_back(SphereLightSource(radius, p, emission));
-            lightFlag = true;
-            cameraParamsFlag = false;
-            radius = 0;
-            p = Point3f();
-            emission = Vec3f();
+            if (type == QUAD_LIGHT) {
+                this->scene.quadLights.push_back(quadLight);
+                quadLight.clear();
+            }
+            type = CAMERA_PARAMS;
+        } else if (lineBuf == "spherelight") {
+            if (type == SPHERE_LIGHT) {
+                this->scene.sphereLights.push_back(spherelight);
+                spherelight.clear();
+            }
+            if (type == QUAD_LIGHT) {
+                this->scene.quadLights.push_back(quadLight);
+                quadLight.clear();
+            }
+            type = SPHERE_LIGHT;
         }
 
-        if (cameraParamsFlag && !lightFlag) {
+        if (type == CAMERA_PARAMS) {
             std::string data = lineBuf.substr(lineBuf.find_first_of(' ') + 1);
             std::stringstream ss(data);
             if (lineBuf[0] == 'p') {
@@ -449,28 +446,46 @@ bool Model::loadCfg(std::string cfgPath) {
             }
         }
 
-        if (lightFlag && !cameraParamsFlag) {
+        if (type == SPHERE_LIGHT) {
             std::string data = lineBuf.substr(lineBuf.find_first_of(' ') + 1);
             std::stringstream ss(data);
-
-
             if (lineBuf[0] == 'c') {
                 double cx, cy, cz;
                 ss >> cx >> cy >> cz;
-                p = Point3f(cx, cy, cz);
+                spherelight.position = Point3f(cx, cy, cz);
             } else if (lineBuf[0] == 'r') {
-                ss >> radius;
+                ss >> spherelight.radius;
             } else if (lineBuf[0] == 'L') {
                 double ex, ey, ez;
                 ss >> ex >> ey >> ez;
-                emission = Vec3f(ex, ey, ez);
+                spherelight.emission = Vec3f(ex, ey, ez);
             }
+        }
 
-
+        if (type == QUAD_LIGHT) {
+            std::string data = lineBuf.substr(lineBuf.find_first_of(' ') + 1);
+            std::stringstream ss(data);
+            if (lineBuf[0] == 'c') {
+                double cx, cy, cz;
+                ss >> cx >> cy >> cz;
+                quadLight.center = Point3f(cx, cy, cz);
+            } else if (lineBuf[0] == 'n') {
+                double nx, ny, nz;
+                ss >> nx >> ny >> nz;
+                quadLight.normal = Vector3f(nx, ny, nz);
+            } else if (lineBuf[0] == 's') {
+                double sx, sy;
+                ss >> sx >> sy;
+                quadLight.size = Vec2f(sx, sy);
+            } else if (lineBuf[0] == 'L') {
+                double ex, ey, ez;
+                ss >> ex >> ey >> ez;
+                quadLight.emission = Vec3f(ex, ey, ez);
+            }
         }
     }
-    if (lightFlag)
-        config.sphereLights.push_back(SphereLightSource(radius, p, emission));
+    if (type == SPHERE_LIGHT) this->scene.sphereLights.push_back(spherelight);
+    if (type == QUAD_LIGHT) this->scene.quadLights.push_back(quadLight);
 
     return true;
 }
@@ -508,7 +523,8 @@ void Model::getMaxIndices(Face &face, const Mesh &mesh) {
         }
     }
     face.maxVerticesIndices[2] = zMaxIndices;
-    if (face.maxVerticesIndices[0] == -1 || face.maxVerticesIndices[1] == -1 || face.maxVerticesIndices[2] == -1)
+    if (face.maxVerticesIndices[0] == -1 || face.maxVerticesIndices[1] == -1 ||
+        face.maxVerticesIndices[2] == -1)
         printf("DEBUG: maxVertices error!\n");
 }
 
@@ -545,7 +561,8 @@ void Model::getMinIndices(Face &face, const Mesh &mesh) {
         }
     }
     face.minVerticesIndices[2] = zMinIndices;
-    if (face.maxVerticesIndices[0] == -1 || face.maxVerticesIndices[1] == -1 || face.maxVerticesIndices[2] == -1)
+    if (face.maxVerticesIndices[0] == -1 || face.maxVerticesIndices[1] == -1 ||
+        face.maxVerticesIndices[2] == -1)
         printf("DEBUG: maxVertices error!\n");
 }
 
@@ -571,10 +588,12 @@ void Model::computeFaceNormal(Face &face, const Mesh &mesh) {
 bool Mesh::isIntersect(const Ray &ray) {
     Vec3f rMax, rMin;
 
-    rMax = Vec3f((maxVertices.x - ray.o.x) / ray.d.x, (maxVertices.y - ray.o.y) / ray.d.y,
+    rMax = Vec3f((maxVertices.x - ray.o.x) / ray.d.x,
+                 (maxVertices.y - ray.o.y) / ray.d.y,
                  (maxVertices.z - ray.o.z) / ray.d.z);
 
-    Vec3f temp = Vec3f((minVertices.x - ray.o.x) / ray.d.x, (minVertices.y - ray.o.y) / ray.d.y,
+    Vec3f temp = Vec3f((minVertices.x - ray.o.x) / ray.d.x,
+                       (minVertices.y - ray.o.y) / ray.d.y,
                        (minVertices.z - ray.o.z) / ray.d.z);
 
     if (temp.x > rMax.x) {
@@ -595,10 +614,8 @@ bool Mesh::isIntersect(const Ray &ray) {
     } else
         rMin.z = temp.z;
 
-    if (rMax.x <= 0 || rMax.y <= 0 || rMax.z <= 0)
-        return false;
-    if (rMax.x == INF || rMax.y == INF || rMax.z == INF)
-        return false;
+    if (rMax.x <= 0 || rMax.y <= 0 || rMax.z <= 0) return false;
+    if (rMax.x == INF || rMax.y == INF || rMax.z == INF) return false;
     rMin.x = std::max(rMin.x, 0.);
     rMin.y = std::max(rMin.y, 0.);
     rMin.z = std::max(rMin.z, 0.);
@@ -617,9 +634,7 @@ bool Mesh::isIntersect(const Ray &ray) {
     if (range1[1] >= range2[0] && range1[0] <= range2[1]) {
         range12[0] = std::max(range1[0], range2[0]);
         range12[1] = std::max(range1[0], range2[1]);
-        if (range12[1] >= range3[0] && range12[0] <= range3[1])
-            return true;
+        if (range12[1] >= range3[0] && range12[0] <= range3[1]) return true;
     }
     return false;
 }
-

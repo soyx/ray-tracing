@@ -15,6 +15,8 @@ public:
 
     double intersect(const Ray &ray) const override;
 
+    void clear() override;
+
     Point3f position;
     double radius;
 };

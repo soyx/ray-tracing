@@ -22,3 +22,11 @@ double SphereLightSource::intersect(const Ray &ray) const {
 
     return t;
 }
+
+void SphereLightSource::clear(){
+    this->emission = Vec3f();
+    this->KDiffuse = Vec3f();
+    this->KSpecular = Vec3f();
+    this->position = Point3f();
+    this->radius = 0;
+}

@@ -13,6 +13,8 @@ public:
 
     virtual double intersect(const Ray &ray) const = 0;
 
+    virtual void clear() = 0;
+
 public:
     Vec3f emission;
     Vec3f KDiffuse;
