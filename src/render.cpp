@@ -171,6 +171,7 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
 
     // obj meshes
     if (interType == FACE) {
+        int mid = renderModel.scene.mtlName2ID[face.materialName];
         Material material =
             renderModel.scene
                 .mMaterials[renderModel.scene.mtlName2ID[face.materialName]];
@@ -264,7 +265,7 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
                     Vec3f kr = mul(Vec3f(R, R, R), kdegradation);
                     double T = 1 - R;
                     Vec3f kt = mul(Vec3f(T, T, T), kdegradation);
-                    return face.emission + mul(kr, radiance(reflRay, depth)) +
+                    xyzColor = xyzColor +face.emission + mul(kr, radiance(reflRay, depth + 1)) +
                            mul(kt, radiance(Ray(p, tdir), depth + 1));
                 }
             }
@@ -292,8 +293,8 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
                 Vec3f kr = mul(Vec3f(R, R, R), kdegradation);
                 double T = 1 - R;
                 Vec3f kt = mul(Vec3f(T, T, T), kdegradation);
-                return face.emission +
-                       mul(kr, radiance(reflRay, depth)) +
+                xyzColor = xyzColor + face.emission +
+                       mul(kr, radiance(reflRay, depth + 1)) +
                        mul(kt, radiance(Ray(p, tdir), depth + 1));
             }
         }
@@ -333,14 +334,14 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
                              .normalize();
 
             xyzColor =
-                xyzColor + mul(light.KDiffuse, radiance(Ray(p, d), ++depth));
+                xyzColor + mul(light.KDiffuse, radiance(Ray(p, d), depth + 1));
         }
 
         if (light.KSpecular.maxCor > 1e-10) {
             xyzColor =
                 xyzColor +
                 mul(light.KSpecular,
-                    radiance(Ray(p, ray.d - n * 2 * dot(n, ray.d)), ++depth));
+                    radiance(Ray(p, ray.d - n * 2 * dot(n, ray.d)), depth + 1));
         }
     }
 

@@ -33,27 +33,7 @@ int main(int argc, char *argv[]) {
 
         path = std::string(argv[i]);
     }
-    // if (argc >= 2) {
-    //     if(std::string(argv[index]) == "-o" && argc >= index + 2){
-    //         index++;
-    //         filename = std::string(argv[index++]);
-    //     }
-    //     else if(std::string(argv[index]) == "-n" && argc >= index + 2){
-    //         index++;
-    //         sampleNum = atoi(argv[index++]);
-    //     }
-    //     else{
-    //         path = std::string(argv[index++]);
-    //         std::cout << "objpath:" << path << std::endl;
-    //     }
-    // }
-    // Model model("../resources/Scene02/room.obj", "../resources/Scene02/room.mtl");
     Model model(path);
-//    Camera camera(Point3f(50, 60,160), Vector3f(0,1,0), Point3f(50 ,30, 0), 100);
-//    Camera camera(Point3f(50, 45, 170), Point3f(50, 30, 0), Vector3f(0, 1, 0), 10);
-
-    // int width = 800;
-    // int height = 600;
     double focal = 1000.;
 
     Camera camera(model.config.cameraparams.position, model.config.cameraparams.lookat, model.config.cameraparams.up,
