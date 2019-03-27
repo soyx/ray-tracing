@@ -108,6 +108,8 @@ public:
 
     Config config;
 
+    time_t loadTime;
+
 private:
     bool loadObj(std::string objPath);
 

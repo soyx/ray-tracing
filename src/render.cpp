@@ -7,6 +7,7 @@ Render::Render(Model &model, Camera &camera, int sampleNum)
 }
 
 void Render::run() {
+    time_t start = time(NULL);
     int total = camera.filmSize.x * camera.filmSize.y;
 
     for (int y = 0; y < camera.filmSize.y; y++) {
@@ -33,9 +34,11 @@ void Render::run() {
             camera.film[y * camera.filmSize.x + x] = c;
         }
     }
+    renderTime += (time(NULL) - start);
 }
 
 double Render::intersect(const Face &face, const Ray &ray) {
+    time_t start = time(NULL);
     // intersection with mesh
     Vec3f rMax, rMin;
 
@@ -71,7 +74,9 @@ double Render::intersect(const Face &face, const Ray &ray) {
     } else
         rMin.z = temp.z;
 
-    if (rMax.x <= 0 || rMax.y <= 0 || rMax.z <= 0) return 0;
+    if (rMax.x <= 0 || rMax.y <= 0 || rMax.z <= 0) {
+        interTime += (time(NULL)-start);
+        return 0;}
     rMin.x = std::max(rMin.x, 0.);
     rMin.y = std::max(rMin.y, 0.);
     rMin.z = std::max(rMin.z, 0.);
@@ -93,8 +98,10 @@ double Render::intersect(const Face &face, const Ray &ray) {
         if (range12[1] >= range3[0] && range12[0] <= range3[1]) {
             // detail process
             // resolve equation
-            if (dot(face.faceNormal, ray.d) == 0) return 0;
-
+            if (dot(face.faceNormal, ray.d) == 0) {
+                interTime += (time(NULL) - start);
+                return 0;
+            }
             double t = -(face.a * ray.o.x + face.b * ray.o.y +
                          face.c * ray.o.z + face.d) /
                        dot(face.faceNormal, ray.d);
@@ -126,10 +133,12 @@ double Render::intersect(const Face &face, const Ray &ray) {
             }
 
             if (m + n <= 1 && m >= 0 && n >= 0) {
+                interTime += (time(NULL) - start);
                 return t;
             }
         }
     }
+    interTime += (time(NULL) - start);
     return 0;
 }
 
@@ -243,7 +252,7 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
                          v * std::sin(theta) * std::sin(phi) +
                          w * std::cos(theta);
             Vector3f N = nl;
-            Vector3f V = H * 2 * std::cos(theta) - L;
+            Vector3f V = H * 2 * dot(H, L) - L;
 
             xyzColor =
                 xyzColor +

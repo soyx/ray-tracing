@@ -11,6 +11,7 @@ Model::Model(std::string objPath, std::string mtlPath) {
 
 bool Model::load(std::string objPath, std::string mtlPath,
                  std::string cfgPath) {
+    time_t start = time(NULL);
     scene.mMaterials.clear();
     scene.mMeshes.clear();
     scene.mNumLights = 0;
@@ -51,6 +52,8 @@ bool Model::load(std::string objPath, std::string mtlPath,
 
     scene.mNumMaterials = scene.mMaterials.size();
     scene.mNumMeshes = scene.mMeshes.size();
+
+    loadTime = time(NULL) - start;
     return true;
 }
 

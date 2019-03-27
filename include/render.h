@@ -21,6 +21,8 @@ struct Color {
 class Render {
 public:
 
+    time_t interTime = 0, renderTime = 0;
+
     Render(Model &model, Camera &camera, int sampleNum = 50);
 
     void run();

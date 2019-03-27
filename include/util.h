@@ -3,6 +3,7 @@
 
 #include <limits>
 #include <cmath>
+#include <ctime>
 
 #define INF std::numeric_limits<double>::infinity()
 #define PI 3.1415926

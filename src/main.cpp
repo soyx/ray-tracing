@@ -15,6 +15,18 @@ inline int toInt(double x) {
 //    return int(x <0 ? 0 : x > 255 ? 255 : x);
 //}
 
+struct Time{
+    int d, h, m, s;
+};
+
+Time getTime(time_t duration){
+    Time t;
+    t.d = duration/(3600*24);
+    t.h = duration%(3600*24)/3600;
+    t.m = duration%(3600)/60;
+    t.s = duration%(60);
+    return t;
+}
 int main(int argc, char *argv[]) {
     time_t start = time(NULL);
     std::string filename = "image.ppm";
@@ -51,6 +63,18 @@ int main(int argc, char *argv[]) {
     }
     time_t stop = time(NULL);
     time_t duration = stop-start;
-    printf("samplenum:%d,time:%ldd%ldh%ldm%lds\n", sampleNum, duration/(24*3600), duration%(24*3600)/3600, duration%3600/60, duration%60);
+    printf("*****report*****\n");
+    printf("**samplenum:%d\n", sampleNum);
+    Time tTime = getTime(duration);
+    printf("**total time:%dd%dh%dm%ds\n", tTime.d,tTime.h,tTime.m,tTime.s);
+    tTime = getTime(model.loadTime);
+    printf("****load time:%dd%dh%dm%ds\n", tTime.d,tTime.h,tTime.m,tTime.s);
+    tTime = getTime(render.renderTime);
+    printf("****render time:%dd%dh%dm%ds\n", tTime.d,tTime.h,tTime.m,tTime.s);
+    tTime = getTime(render.interTime);
+    printf("*******intersect time:%dd%dh%dm%ds\n", tTime.d,tTime.h,tTime.m,tTime.s);
+    tTime = getTime(render.renderTime - render.interTime);
+    printf("*******tracing time:%dd%dh%dm%ds\n", tTime.d,tTime.h,tTime.m,tTime.s);
+    
     return 0;
 }
