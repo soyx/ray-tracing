@@ -8,10 +8,9 @@ Render::Render(Model &model, Camera &camera, int sampleNum)
 
 void Render::run() {
     int total = camera.filmSize.x * camera.filmSize.y;
-    
+
     for (int y = 0; y < camera.filmSize.y; y++) {
-        
-        #pragma omp parallel for schedule(dynamic, 1)
+#pragma omp parallel for schedule(dynamic, 1)
         for (int x = 0; x < camera.filmSize.x; x++) {
             fprintf(stderr, "\r%5.4f%%",
                     100. * (y * camera.filmSize.x + x) / total);
@@ -138,7 +137,7 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
     double t = std::numeric_limits<double>::infinity();
     Face face;
     int id = -1;
-    enum InterType { OTHER, FACE, SPHERE_LIGHTSOURCE,QUAD_LIGHTSOURCE };
+    enum InterType { OTHER, FACE, SPHERE_LIGHTSOURCE, QUAD_LIGHTSOURCE };
 
     InterType interType = OTHER;
 
@@ -167,13 +166,13 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
             interType = SPHERE_LIGHTSOURCE;
         }
     }
-    for(unsigned int i = 0; i < renderModel.scene.quadLights.size(); i++){
-       double tt = renderModel.scene.sphereLights[i].intersect(ray);
+    for (unsigned int i = 0; i < renderModel.scene.quadLights.size(); i++) {
+        double tt = renderModel.scene.sphereLights[i].intersect(ray);
         if (tt > 1e-10 && tt < t) {
             t = tt;
             id = i;
             interType = QUAD_LIGHTSOURCE;
-        } 
+        }
     }
 
     Vec3f xyzColor(0, 0, 0);
@@ -199,8 +198,10 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
         Vector3f n = face.faceNormal;
         Vector3f nl;
 
-        if (dot(n, ray.d) > 0) nl = n * -1;
-        else nl = n;
+        if (dot(n, ray.d) > 0)
+            nl = n * -1;
+        else
+            nl = n;
 
         if (material.KDiffuse.maxCor > 1e-10) {
             double r1 = 2 * M_PI * (RANDNUM);
@@ -219,37 +220,46 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
                           w * std::sqrt(1 - r2))
                              .normalize();
 
-            xyzColor =
-                xyzColor + mul(material.KDiffuse, radiance(Ray(p, d), depth + 1)) * dot(d, nl);
+            xyzColor = xyzColor +
+                       mul(material.KDiffuse, radiance(Ray(p, d), depth + 1)) *
+                           dot(d, nl);
         }
 
         if (material.KSpecular.maxCor > 1e-10) {
-            Vector3f R = (ray.d - nl * 2 * dot(nl, ray.d)).normalize();
-            Vector3f w = R;
+            Vector3f w = nl;
             Vector3f u;
-            if(std::abs(w.x) > std::abs(w.y))
+            if (std::abs(w.x) > std::abs(w.y))
                 u = cross(Vector3f(0, 1, 0), w).normalize();
             else
                 u = cross(Vector3f(1, 0, 0), w).normalize();
             Vector3f v = cross(w, u);
 
-            double r1 = (RANDNUM);
-            // double theta = (3 - r1 * r1 - 2 * r1) * M_PI / 6 ;
-            double theta = std::pow(r1, material.Ns)*M_PI / 2;
-            double phi = (RANDNUM) * 2 * M_PI;
+            double theta =
+                std::acos(std::pow((RANDNUM), 1 / (material.Ns + 1)));
+            double phi = 2 * M_PI * (RANDNUM);
 
-            Vector3f V = u * std::sin(theta)*std::cos(phi) + v * std::sin(theta)*std::sin(phi) + w * std::cos(theta);
-                        
             Vector3f L = ray.d * -1;
-            Vector3f H = (L + V).normalize();
+            Vector3f H = u * std::sin(theta) * std::cos(phi) +
+                         v * std::sin(theta) * std::sin(phi) +
+                         w * std::cos(theta);
             Vector3f N = nl;
+            Vector3f V = H * 2 * std::cos(theta) - L;
 
-            xyzColor = xyzColor + mul(material.KSpecular * std::pow(dot(H, N), material.Ns) * (material.Ns + 1), radiance(Ray(p, V), depth + 1));
+            xyzColor =
+                xyzColor +
+                mul(material.KSpecular *
+                        std::pow(dot(H, N) * (material.Ns + 1), material.Ns) *
+                        2 * M_PI *
+                        (1 / ((material.Ns + 1) *
+                              std::pow(std::cos(theta), material.Ns) *
+                              std::sin(theta))),
+                    radiance(Ray(p, V), depth + 1));
 
-            //xyzColor =
+            // xyzColor =
             //    xyzColor +
             //    mul(material.KSpecular,
-            //        radiance(Ray(p, ray.d - nl * 2 * dot(nl, ray.d)), depth + 1));
+            //        radiance(Ray(p, ray.d - nl * 2 * dot(nl, ray.d)), depth +
+            //        1));
         }
 
         if (material.Tf.maxCor <= 1 - 1e-10) {
@@ -271,7 +281,7 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
                 if (sinTheta1 > sinThresh) {
                     // all reflect
                     xyzColor = xyzColor + face.emission +
-                           mul(kdegradation, radiance(reflRay, depth + 1));
+                               mul(kdegradation, radiance(reflRay, depth + 1));
                 } else {
                     // light plane
                     Vector3f nt = cross(nl, cross(ray.d, nl)).normalize();
@@ -279,8 +289,8 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
                     double sin2Theta2 = (1 - cos2Theta1) * n12 * n12;
                     double cos2Theta2 = 1 - sin2Theta2;
 
-                    Vector3f tdir =
-                        nl * -std::sqrt(cos2Theta2) + nt * std::sqrt(sin2Theta2);
+                    Vector3f tdir = nl * -std::sqrt(cos2Theta2) +
+                                    nt * std::sqrt(sin2Theta2);
 
                     double a = n12 * std::sqrt(1 - (n12 * sinTheta1) *
                                                        (n12 * sinTheta1));
@@ -295,8 +305,9 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
                     Vec3f kr = mul(Vec3f(R, R, R), kdegradation);
                     double T = 1 - R;
                     Vec3f kt = mul(Vec3f(T, T, T), kdegradation);
-                    xyzColor = xyzColor + face.emission + mul(kr, radiance(reflRay, depth + 1)) +
-                           mul(kt, radiance(Ray(p, tdir), depth + 1));
+                    xyzColor = xyzColor + face.emission +
+                               mul(kr, radiance(reflRay, depth + 1)) +
+                               mul(kt, radiance(Ray(p, tdir), depth + 1));
                 }
             }
             // outside -> inside
@@ -324,8 +335,8 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
                 double T = 1 - R;
                 Vec3f kt = mul(Vec3f(T, T, T), kdegradation);
                 xyzColor = xyzColor + face.emission +
-                       mul(kr, radiance(reflRay, depth + 1)) +
-                       mul(kt, radiance(Ray(p, tdir), depth + 1));
+                           mul(kr, radiance(reflRay, depth + 1)) +
+                           mul(kt, radiance(Ray(p, tdir), depth + 1));
             }
         }
     }
@@ -373,8 +384,7 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
                 mul(light.KSpecular,
                     radiance(Ray(p, ray.d - n * 2 * dot(n, ray.d)), depth + 1));
         }
-    }
-    else if(interType == QUAD_LIGHTSOURCE){
+    } else if (interType == QUAD_LIGHTSOURCE) {
         QuadLightSource light = renderModel.scene.quadLights[id];
         xyzColor = xyzColor + light.emission;
         if (depth > 5) {
