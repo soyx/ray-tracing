@@ -9,10 +9,10 @@ Render::Render(Model &model, Camera &camera, int sampleNum)
 void Render::run() {
     int total = camera.filmSize.x * camera.filmSize.y;
     
-    for (unsigned int y = 0; y < camera.filmSize.y; y++) {
+    for (int y = 0; y < camera.filmSize.y; y++) {
         
         #pragma omp parallel for schedule(dynamic, 1)
-        for (unsigned int x = 0; x < camera.filmSize.x; x++) {
+        for (int x = 0; x < camera.filmSize.x; x++) {
             fprintf(stderr, "\r%5.4f%%",
                     100. * (y * camera.filmSize.x + x) / total);
             Vec3f c;
@@ -143,10 +143,10 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
     InterType interType = OTHER;
 
     // obj meshes
-    for (unsigned int i = 0; i < renderModel.scene.mNumMeshes; i++) {
+    for (int i = 0; i < renderModel.scene.mNumMeshes; i++) {
         Mesh mesh = renderModel.scene.mMeshes[i];
         if (!mesh.isIntersect(ray)) continue;
-        for (unsigned int j = 0; j < mesh.numFaces; j++) {
+        for (int j = 0; j < mesh.numFaces; j++) {
             double tt = intersect(mesh.faces[j], ray);
             if (tt > 1e-10 && tt < t) {
                 t = tt;
@@ -167,13 +167,20 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
             interType = SPHERE_LIGHTSOURCE;
         }
     }
+    for(unsigned int i = 0; i < renderModel.scene.quadLights.size(); i++){
+       double tt = renderModel.scene.sphereLights[i].intersect(ray);
+        if (tt > 1e-10 && tt < t) {
+            t = tt;
+            id = i;
+            interType = QUAD_LIGHTSOURCE;
+        } 
+    }
 
     Vec3f xyzColor(0, 0, 0);
     if (id < 0) return xyzColor;
 
     // obj meshes
     if (interType == FACE) {
-        int mid = renderModel.scene.mtlName2ID[face.materialName];
         Material material =
             renderModel.scene
                 .mMaterials[renderModel.scene.mtlName2ID[face.materialName]];
@@ -199,7 +206,6 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
             double r1 = 2 * M_PI * (RANDNUM);
             double r2 = (RANDNUM);
             double r2s = std::sqrt(r2);
-
             Vector3f w = nl;
             Vector3f u;
             if (std::abs(w.x) > std::abs(w.y)) {
@@ -218,10 +224,32 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
         }
 
         if (material.KSpecular.maxCor > 1e-10) {
-            xyzColor =
-                xyzColor +
-                mul(material.KSpecular,
-                    radiance(Ray(p, ray.d - nl * 2 * dot(nl, ray.d)), depth + 1));
+            Vector3f R = (ray.d - nl * 2 * dot(nl, ray.d)).normalize();
+            Vector3f w = R;
+            Vector3f u;
+            if(std::abs(w.x) > std::abs(w.y))
+                u = cross(Vector3f(0, 1, 0), w).normalize();
+            else
+                u = cross(Vector3f(1, 0, 0), w).normalize();
+            Vector3f v = cross(w, u);
+
+            double r1 = (RANDNUM);
+            // double theta = (3 - r1 * r1 - 2 * r1) * M_PI / 6 ;
+            double theta = std::pow(r1, material.Ns)*M_PI / 2;
+            double phi = (RANDNUM) * 2 * M_PI;
+
+            Vector3f V = u * std::sin(theta)*std::cos(phi) + v * std::sin(theta)*std::sin(phi) + w * std::cos(theta);
+                        
+            Vector3f L = ray.d * -1;
+            Vector3f H = (L + V).normalize();
+            Vector3f N = nl;
+
+            xyzColor = xyzColor + mul(material.KSpecular * std::pow(dot(H, N), material.Ns) * (material.Ns + 1), radiance(Ray(p, V), depth + 1));
+
+            //xyzColor =
+            //    xyzColor +
+            //    mul(material.KSpecular,
+            //        radiance(Ray(p, ray.d - nl * 2 * dot(nl, ray.d)), depth + 1));
         }
 
         if (material.Tf.maxCor <= 1 - 1e-10) {
@@ -314,6 +342,50 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
         }
         Point3f p = ray.o + ray.d * t;
         Vector3f n = (p - light.position).normalize();
+
+        if (dot(n, ray.d) > 0) n = n * -1;
+
+        if (light.KDiffuse.maxCor > 1e-10) {
+            double r1 = 2 * M_PI * (RANDNUM);
+            double r2 = (RANDNUM);
+            double r2s = std::sqrt(r2);
+
+            Vector3f w = n;
+            Vector3f u;
+            if (std::abs(w.x) > std::abs(w.y)) {
+                u = cross(Vector3f(0, 1, 0), w).normalize();
+            } else {
+                u = cross(Vector3f(1, 0, 0), w).normalize();
+            }
+            Vector3f v = cross(w, u);
+
+            Vector3f d = (u * std::cos(r1) * r2s + v * std::sin(r1) * r2s +
+                          w * std::sqrt(1 - r2))
+                             .normalize();
+
+            xyzColor =
+                xyzColor + mul(light.KDiffuse, radiance(Ray(p, d), depth + 1));
+        }
+
+        if (light.KSpecular.maxCor > 1e-10) {
+            xyzColor =
+                xyzColor +
+                mul(light.KSpecular,
+                    radiance(Ray(p, ray.d - n * 2 * dot(n, ray.d)), depth + 1));
+        }
+    }
+    else if(interType == QUAD_LIGHTSOURCE){
+        QuadLightSource light = renderModel.scene.quadLights[id];
+        xyzColor = xyzColor + light.emission;
+        if (depth > 5) {
+            if (depth > 10) return xyzColor;
+            double rNum = (RANDNUM);
+            if (light.KDiffuse.maxCor < rNum && light.KSpecular.maxCor < rNum) {
+                return xyzColor;
+            }
+        }
+        Point3f p = ray.o + ray.d * t;
+        Vector3f n = light.normal;
 
         if (dot(n, ray.d) > 0) n = n * -1;
 

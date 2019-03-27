@@ -8,6 +8,7 @@
 #include "util.h"
 #include "model.h"
 #include "camera.h"
+#include <omp.h>
 
 #define RANDNUM std::rand() / (double)(RAND_MAX)
 
