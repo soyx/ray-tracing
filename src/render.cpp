@@ -176,7 +176,7 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
         }
     }
     for (unsigned int i = 0; i < renderModel.scene.quadLights.size(); i++) {
-        double tt = renderModel.scene.sphereLights[i].intersect(ray);
+        double tt = renderModel.scene.quadLights[i].intersect(ray);
         if (tt > 1e-10 && tt < t) {
             t = tt;
             id = i;
@@ -243,14 +243,15 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
                 u = cross(Vector3f(1, 0, 0), w).normalize();
             Vector3f v = cross(w, u);
 
-            double theta =
-                std::acos(std::pow((RANDNUM), 1 / (material.Ns + 1)));
+            
+            double cosTheta = std::pow((RANDNUM), 1 / (material.Ns + 1));
+            double sinTheta = std::sqrt(1 - cosTheta * cosTheta);
             double phi = 2 * M_PI * (RANDNUM);
 
             Vector3f L = ray.d * -1;
-            Vector3f H = u * std::sin(theta) * std::cos(phi) +
-                         v * std::sin(theta) * std::sin(phi) +
-                         w * std::cos(theta);
+            Vector3f H = u * sinTheta * std::cos(phi) +
+                         v * sinTheta * std::sin(phi) +
+                         w * cosTheta;
             Vector3f N = nl;
             Vector3f V = H * 2 * dot(H, L) - L;
 
@@ -260,8 +261,8 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
                         std::pow(dot(H, N) * (material.Ns + 1), material.Ns) *
                         2 * M_PI *
                         (1 / ((material.Ns + 1) *
-                              std::pow(std::cos(theta), material.Ns) *
-                              std::sin(theta))),
+                              std::pow(cosTheta, material.Ns) *
+                              sinTheta)),
                     radiance(Ray(p, V), depth + 1));
 
             // xyzColor =
