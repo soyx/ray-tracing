@@ -10,8 +10,14 @@ void Render::run() {
     time_t start = time(NULL);
     int total = camera.filmSize.x * camera.filmSize.y;
 
+    #ifdef __linux__
+    int num_procs = omp_get_num_procs();
+    printf("%d Processors\n", num_procs / 2);
+    omp_set_num_threads(num_procs/2); 
+    #endif
+
     for (int y = 0; y < camera.filmSize.y; y++) {
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(dynamic, 5)
         for (int x = 0; x < camera.filmSize.x; x++) {
             fprintf(stderr, "\r%5.4f%%",
                     100. * (y * camera.filmSize.x + x) / total);
