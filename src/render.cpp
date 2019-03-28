@@ -11,7 +11,7 @@ void Render::run() {
     int total = camera.filmSize.x * camera.filmSize.y;
 
     for (int y = 0; y < camera.filmSize.y; y++) {
-#pragma omp parallel for schedule(dynamic, 1)
+#pragma omp parallel for schedule(static)
         for (int x = 0; x < camera.filmSize.x; x++) {
             fprintf(stderr, "\r%5.4f%%",
                     100. * (y * camera.filmSize.x + x) / total);
