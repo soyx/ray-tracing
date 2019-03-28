@@ -258,7 +258,7 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
             xyzColor =
                 xyzColor +
                 mul(material.KSpecular *
-                        std::pow(dot(H, N) * (material.Ns + 1), material.Ns) *
+                        std::pow(dot(H, N), material.Ns) *
                         2 * M_PI *
                         (1 / ((material.Ns + 1) *
                               std::pow(cosTheta, material.Ns) *

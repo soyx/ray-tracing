@@ -56,7 +56,7 @@ struct Material {
     Vec3f Tf = Vec3f(1,1,1);
 
     double Ni = 1.0;
-    double Ns = 1.0;
+    double Ns;
 };
 
 
