@@ -427,6 +427,16 @@ bool Model::loadCfg(std::string cfgPath) {
                 quadLight.clear();
             }
             type = SPHERE_LIGHT;
+        } else if( lineBuf == "quadlight"){
+            if (type == SPHERE_LIGHT) {
+                this->scene.sphereLights.push_back(spherelight);
+                spherelight.clear();
+            }
+            if (type == QUAD_LIGHT) {
+                this->scene.quadLights.push_back(quadLight);
+                quadLight.clear();
+            }
+            type = QUAD_LIGHT;
         }
 
         if (type == CAMERA_PARAMS) {
