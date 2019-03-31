@@ -7,7 +7,7 @@ Render::Render(Model &model, Camera &camera, int sampleNum)
 }
 
 void Render::run() {
-    time_t start = time(NULL);
+//    time_t start = time(NULL);
     int total = camera.filmSize.x * camera.filmSize.y;
 
     #ifdef __linux__
@@ -40,11 +40,11 @@ void Render::run() {
             camera.film[y * camera.filmSize.x + x] = c;
         }
     }
-    renderTime += (time(NULL) - start);
+//    renderTime += (time(NULL) - start);
 }
 
 double Render::intersect(const Face &face, const Ray &ray) {
-    time_t start = time(NULL);
+//    time_t start = time(NULL);
     // intersection with mesh
     Vec3f rMax, rMin;
 
@@ -81,7 +81,7 @@ double Render::intersect(const Face &face, const Ray &ray) {
         rMin.z = temp.z;
 
     if (rMax.x <= 0 || rMax.y <= 0 || rMax.z <= 0) {
-        interTime += (time(NULL)-start);
+//        interTime += (time(NULL)-start);
         return 0;}
     rMin.x = std::max(rMin.x, 0.);
     rMin.y = std::max(rMin.y, 0.);
@@ -105,7 +105,7 @@ double Render::intersect(const Face &face, const Ray &ray) {
             // detail process
             // resolve equation
             if (dot(face.faceNormal, ray.d) == 0) {
-                interTime += (time(NULL) - start);
+//                interTime += (time(NULL) - start);
                 return 0;
             }
             double t = -(face.a * ray.o.x + face.b * ray.o.y +
@@ -139,12 +139,12 @@ double Render::intersect(const Face &face, const Ray &ray) {
             }
 
             if (m + n <= 1 && m >= 0 && n >= 0) {
-                interTime += (time(NULL) - start);
+//                interTime += (time(NULL) - start);
                 return t;
             }
         }
     }
-    interTime += (time(NULL) - start);
+//    interTime += (time(NULL) - start);
     return 0;
 }
 

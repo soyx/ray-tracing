@@ -67,14 +67,14 @@ int main(int argc, char *argv[]) {
     printf("**samplenum:%d\n", sampleNum);
     Time tTime = getTime(duration);
     printf("**total time:%dd%dh%dm%ds\n", tTime.d,tTime.h,tTime.m,tTime.s);
-    tTime = getTime(model.loadTime);
-    printf("****load time:%dd%dh%dm%ds\n", tTime.d,tTime.h,tTime.m,tTime.s);
-    tTime = getTime(render.renderTime);
-    printf("****render time:%dd%dh%dm%ds\n", tTime.d,tTime.h,tTime.m,tTime.s);
-    tTime = getTime(render.interTime);
-    printf("*******intersect time:%dd%dh%dm%ds\n", tTime.d,tTime.h,tTime.m,tTime.s);
-    tTime = getTime(render.renderTime - render.interTime);
-    printf("*******tracing time:%dd%dh%dm%ds\n", tTime.d,tTime.h,tTime.m,tTime.s);
+//    tTime = getTime(model.loadTime);
+//    printf("****load time:%dd%dh%dm%ds\n", tTime.d,tTime.h,tTime.m,tTime.s);
+//    tTime = getTime(render.renderTime);
+//    printf("****render time:%dd%dh%dm%ds\n", tTime.d,tTime.h,tTime.m,tTime.s);
+//    tTime = getTime(render.interTime);
+//    printf("*******intersect time:%dd%dh%dm%ds\n", tTime.d,tTime.h,tTime.m,tTime.s);
+//    tTime = getTime(render.renderTime - render.interTime);
+//    printf("*******tracing time:%dd%dh%dm%ds\n", tTime.d,tTime.h,tTime.m,tTime.s);
     
     return 0;
 }
