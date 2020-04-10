@@ -8,7 +8,7 @@
 #include "util.h"
 #include "model.h"
 #include "camera.h"
-#include <omp.h>
+// #include <omp.h>
 
 #define RANDNUM std::rand() / (double)(RAND_MAX)
 
@@ -26,6 +26,7 @@ public:
     Render(Model &model, Camera &camera, int sampleNum = 50);
 
     void run();
+    void run(int x1, int x2, int y1, int y2);
 
 private:
 

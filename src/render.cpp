@@ -9,6 +9,43 @@ Render::Render(Model &model, Camera &camera, int sampleNum)
 void Render::run() {
 //    time_t start = time(NULL);
     int total = camera.filmSize.x * camera.filmSize.y;
+#ifdef __linux__
+  int num_procs = omp_get_num_procs();
+    printf("%d Processors\n", num_procs / 2);
+    omp_set_num_threads(num_procs/2);
+#endif
+
+  for (int y = 0; y < camera.filmSize.y; y++) {
+#pragma omp parallel for schedule(dynamic, 5)
+    for (int x = 0; x < camera.filmSize.x; x++) {
+      fprintf(stderr, "\r%5.4f%%",
+              100. * (y * camera.filmSize.x + x) / total);
+      Vec3f c;
+      // #pragma omp parallel for schedule(dynamic, 1)
+      for (int i = 0; i < sampleNum; i++) {
+        // filter
+        double r1 = 2 * (RANDNUM);
+        double r2 = 2 * (RANDNUM);
+        double dx = r1 < 1 ? std::sqrt(r1) - 1 : 1 - std::sqrt(2 - r1);
+        double dy = r2 < 1 ? std::sqrt(r2) - 1 : 1 - std::sqrt(2 - r2);
+
+        Vector3f d = camera.camera2World(
+            camera.raster2Camera(
+                Point3f(x + (dx + .5) * .5, y + (dy + .5) * .5, 1.)) -
+                Point3f(0, 0, 0));
+        c = c + radiance(Ray(camera.position, d.normalize()), 0) *
+            (1. / sampleNum);
+      }
+      camera.film[y * camera.filmSize.x + x] = c;
+    }
+  }
+//    renderTime += (time(NULL) - start);
+}
+
+void Render::run(int x1, int x2, int y1, int y2) {
+//    time_t start = time(NULL);
+    int total = camera.filmSize.x * camera.filmSize.y;
+    float sampleNumInv = 1. / sampleNum;
 
     #ifdef __linux__
     int num_procs = omp_get_num_procs();
@@ -17,8 +54,12 @@ void Render::run() {
     #endif
 
     for (int y = 0; y < camera.filmSize.y; y++) {
+      if(y < y1 || y >= y2)
+        continue;
 #pragma omp parallel for schedule(dynamic, 5)
         for (int x = 0; x < camera.filmSize.x; x++) {
+          if(x < x1 || x >= x2)
+            continue;
             fprintf(stderr, "\r%5.4f%%",
                     100. * (y * camera.filmSize.x + x) / total);
             Vec3f c;
@@ -29,13 +70,14 @@ void Render::run() {
                 double r2 = 2 * (RANDNUM);
                 double dx = r1 < 1 ? std::sqrt(r1) - 1 : 1 - std::sqrt(2 - r1);
                 double dy = r2 < 1 ? std::sqrt(r2) - 1 : 1 - std::sqrt(2 - r2);
+            
 
                 Vector3f d = camera.camera2World(
                     camera.raster2Camera(
                         Point3f(x + (dx + .5) * .5, y + (dy + .5) * .5, 1.)) -
                     Point3f(0, 0, 0));
                 c = c + radiance(Ray(camera.position, d.normalize()), 0) *
-                            (1. / sampleNum);
+                            sampleNumInv;
             }
             camera.film[y * camera.filmSize.x + x] = c;
         }
@@ -100,7 +142,8 @@ double Render::intersect(const Face &face, const Ray &ray) {
     double range12[2];
     if (range1[1] >= range2[0] && range1[0] <= range2[1]) {
         range12[0] = std::max(range1[0], range2[0]);
-        range12[1] = std::max(range1[0], range2[1]);
+        // range12[1] = std::max(range1[0], range2[1]);
+        range12[1] = std::min(range1[1], range2[1]);
         if (range12[1] >= range3[0] && range12[0] <= range3[1]) {
             // detail process
             // resolve equation
@@ -198,16 +241,6 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
         Material material =
             renderModel.scene
                 .mMaterials[renderModel.scene.mtlName2ID[face.materialName]];
-        if (depth > 5) {
-            if (depth > 10) {
-                return xyzColor;
-            }
-            double rNum = (RANDNUM);
-            if (material.KDiffuse.maxCor < rNum &&
-                material.KSpecular.maxCor < rNum) {
-                return xyzColor;
-            }
-        }
 
         Point3f p = ray.o + ray.d * t;
         Vector3f n = face.faceNormal;
@@ -217,6 +250,48 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
             nl = n * -1;
         else
             nl = n;
+        if (depth > 5) {
+            if (depth > 10) {
+                // response to light
+                // for (unsigned int i = 0; i < renderModel.scene.sphereLights.size(); i++) {
+                //     SphereLightSource light = renderModel.scene.sphereLights[id];
+                //     xyzColor = (mul(material.KDiffuse, light.emission) * dot (n, (light.position - p).normalize()));
+
+                //     if(material.KSpecular.maxCor > 0){
+                //         Vector3f N = nl;
+
+                //         Vector3f L = (light.position - p).normalize();
+                //         Vector3f V = ray.d * -1;
+                //         Vector3f H = (V + L).normalize();
+                //         xyzColor = xyzColor + mul(material.KSpecular, light.emission) * 
+                //             std::pow(dot(H, N), material.Ns) * dot(n, (light.position - p).normalize());
+                //     }
+
+                    
+                    
+                // }
+                return xyzColor;
+            }
+            double rNum = (RANDNUM);
+            if (material.KDiffuse.maxCor < rNum &&
+                material.KSpecular.maxCor < rNum) {
+                // for (unsigned int i = 0; i < renderModel.scene.sphereLights.size(); i++) {
+                //     SphereLightSource light = renderModel.scene.sphereLights[id];
+                //     xyzColor = (mul(material.KDiffuse, light.emission) * dot (n, (light.position - p).normalize()));
+                //     if(material.KSpecular.maxCor > 0){
+                //         Vector3f N = nl;
+
+                //         Vector3f L = (light.position - p).normalize();
+                //         Vector3f V = ray.d * -1;
+                //         Vector3f H = (V + L).normalize();
+                //         xyzColor = xyzColor + mul(material.KSpecular, light.emission) * 
+                //             std::pow(dot(H, N), material.Ns) * dot(n, (light.position - p).normalize());
+                //     }
+                // }
+                
+                return xyzColor;
+            }
+        }
 
         if (material.KDiffuse.maxCor > 1e-10) {
             double r1 = 2 * M_PI * (RANDNUM);
@@ -235,6 +310,7 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
                           w * std::sqrt(1 - r2))
                              .normalize();
 
+    
             xyzColor = xyzColor +
                        mul(material.KDiffuse, radiance(Ray(p, d), depth + 1)) *
                            dot(d, nl);
@@ -264,11 +340,13 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
             xyzColor =
                 xyzColor +
                 mul(material.KSpecular *
-                        std::pow(dot(H, N), material.Ns) *
-                        2 * M_PI *
-                        (1 / ((material.Ns + 1) *
-                              std::pow(cosTheta, material.Ns) *
-                              sinTheta)),
+                        std::pow(dot(H, N), material.Ns)
+                        // *
+                        // 2 * M_PI *
+                        // (1 / ((material.Ns + 1) *
+                        //       std::pow(cosTheta, material.Ns) *
+                        //       sinTheta))
+                              ,
                     radiance(Ray(p, V), depth + 1));
 
             // xyzColor =
@@ -356,6 +434,7 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
             }
         }
     }
+    
     // other shapes
     else if (interType == SPHERE_LIGHTSOURCE) {
         SphereLightSource light = renderModel.scene.sphereLights[id];
@@ -444,6 +523,7 @@ Vec3f Render::radiance(const Ray &ray, int depth) {
                     radiance(Ray(p, ray.d - n * 2 * dot(n, ray.d)), depth + 1));
         }
     }
+    
 
     return xyzColor;
 }

@@ -2,6 +2,8 @@ CMAKE_MINIMUM_REQUIRED( VERSION 3.5)
 
 project(ray_tracing)
 
+set(CMAKE_BUILD_TYPE "Release")
+
 set(CMAKE_CXX_STANDARD 11)
 
 find_package(OpenMP)

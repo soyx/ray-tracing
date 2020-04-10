@@ -601,6 +601,7 @@ void Model::computeFaceNormal(Face &face, const Mesh &mesh) {
 bool Mesh::isIntersect(const Ray &ray) {
     Vec3f rMax, rMin;
 
+    // This is actrually bounding box
     rMax = Vec3f((maxVertices.x - ray.o.x) / ray.d.x,
                  (maxVertices.y - ray.o.y) / ray.d.y,
                  (maxVertices.z - ray.o.z) / ray.d.z);
@@ -646,7 +647,8 @@ bool Mesh::isIntersect(const Ray &ray) {
     double range12[2];
     if (range1[1] >= range2[0] && range1[0] <= range2[1]) {
         range12[0] = std::max(range1[0], range2[0]);
-        range12[1] = std::max(range1[0], range2[1]);
+        // range12[1] = std::max(range1[0], range2[1]);
+        range12[1] = std::min(range1[1], range2[1]);
         if (range12[1] >= range3[0] && range12[0] <= range3[1]) return true;
     }
     return false;

@@ -54,8 +54,8 @@ int main(int argc, char *argv[]) {
                   focal, model.config.cameraparams.fovy * 1.0 / 180 * M_PI, model.config.resolution.width, model.config.resolution.height);
     Render render(model, camera, sampleNum);
 
-    render.run();
-
+    render.run(0, 640, 0, 480);
+//    render.run();
     FILE *file = fopen(filename.c_str(), "w");
     fprintf(file, "P3\n%d %d\n%d\n", model.config.resolution.width, model.config.resolution.height, 255);
     for (auto c : camera.film) {
