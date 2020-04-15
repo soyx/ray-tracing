@@ -1,14 +1,14 @@
 #include "light/quadLightSource.h"
 
-double QuadLightSource::intersect(const Ray &ray) const {
+Float QuadLightSource::intersect(const Ray &ray) const {
     if (dot(normal, ray.d) == 0) return 0;
 
-    double a = normal.x;
-    double b = normal.y;
-    double c = normal.z;
-    double d = -(a * center.x + b * center.y +  c * center.z);
+    Float a = normal.x;
+    Float b = normal.y;
+    Float c = normal.z;
+    Float d = -(a * center.x + b * center.y +  c * center.z);
 
-    double t =
+    Float t =
         (-d - (a * ray.o.x + b * ray.o.y + c * ray.o.z)) / dot(normal, ray.d);
 
     Point3f p = ray.o + ray.d * t;

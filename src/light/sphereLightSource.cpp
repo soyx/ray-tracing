@@ -1,16 +1,16 @@
 #include "light/sphereLightSource.h"
 
-double SphereLightSource::intersect(const Ray &ray) const {
+Float SphereLightSource::intersect(const Ray &ray) const {
     Vector3f op = position - ray.o;
-    double a = dot(ray.d, ray.d);
-    double b = -2 * dot(ray.d, op);
-    double c = dot(op, op) - radius * radius;
+    Float a = dot(ray.d, ray.d);
+    Float b = -2 * dot(ray.d, op);
+    Float c = dot(op, op) - radius * radius;
 
-    double delta = b * b - 4 * a * c;
+    Float delta = b * b - 4 * a * c;
     if (delta < 0) return 0;
-    double sdelta = std::sqrt(delta);
-    double t = 0;
-    double t1, t2;
+    Float sdelta = std::sqrt(delta);
+    Float t = 0;
+    Float t1, t2;
     t1 = (-b - sdelta) / (2 * a);
     t2 = (-b + sdelta) / (2 * a);
     if (t1 > 0) {

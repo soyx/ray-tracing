@@ -11,7 +11,7 @@ public:
 
     virtual ~LightSource() = default;
 
-    virtual double intersect(const Ray &ray) const = 0;
+    virtual Float intersect(const Ray &ray) const = 0;
 
     virtual void clear() = 0;
 

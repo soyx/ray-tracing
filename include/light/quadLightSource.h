@@ -17,7 +17,7 @@ class QuadLightSource : public LightSource {
 
     ~QuadLightSource() override = default;
 
-    double intersect(const Ray &ray) const override;
+    Float intersect(const Ray &ray) const override;
 
     void clear() override;
 
